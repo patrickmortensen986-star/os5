@@ -1,0 +1,1486 @@
+html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SETH ENGINE v2.5.1</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --c:#00d4ff;--b:#4d7fff;--p:#b44dff;--pk:#ff4daf;--g:#28c840;--w:#febc2e;--r:#ff4040;
+  --dark:#040810;--d2:#06101f;--d3:#0b1628;--d4:#101f35;--d5:#162840;
+  --border:rgba(0,212,255,0.15);--border2:rgba(77,127,255,0.2);
+  --glass:rgba(255,255,255,0.03);--t1:#e8eeff;--t2:#7a8fb5;--t3:#3a4d70;
+  --coin:#febc2e;
+}
+html,body{height:100%;overflow:hidden;background:var(--dark);font-family:'Rajdhani',sans-serif;color:var(--t1)}
+canvas#bgc{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ═══════ INSTALLER WRAPPER ═══════ */
+#installer{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center}
+.iwin{
+  width:900px;max-width:98vw;height:600px;max-height:98vh;
+  background:linear-gradient(160deg,rgba(10,18,34,.98),rgba(6,12,24,.99));
+  border:1px solid var(--border);border-radius:12px;
+  box-shadow:0 0 0 1px rgba(0,212,255,.06),0 40px 120px rgba(0,0,0,.85),0 0 80px rgba(0,212,255,.07);
+  display:flex;flex-direction:column;overflow:hidden;position:relative;
+}
+.iwin::before{content:'';position:absolute;inset:0;border-radius:12px;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.025) 3px,rgba(0,0,0,.025) 4px);}
+
+/* titlebar */
+.itb{height:42px;background:rgba(4,8,16,.95);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;user-select:none}
+.dots{display:flex;gap:7px}
+.dot{width:11px;height:11px;border-radius:50%;cursor:pointer}
+.dr{background:#ff5f57}.dy{background:#febc2e}.dg{background:#28c840}
+.itb-title{flex:1;text-align:center;font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:3px;color:var(--t3);text-transform:uppercase}
+.itb-ver{font-size:.6rem;color:var(--t3);font-family:'Share Tech Mono',monospace}
+
+/* installer body */
+.ibody{display:flex;flex:1;overflow:hidden}
+.isb{width:210px;flex-shrink:0;background:rgba(4,8,16,.9);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;padding:24px 0 16px}
+.isb-brand{padding:0 20px 20px;border-bottom:1px solid rgba(0,212,255,.08)}
+.slogo{width:48px;height:48px;border-radius:10px;margin-bottom:10px;
+  background:linear-gradient(135deg,var(--c),var(--b),var(--p));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',sans-serif;font-size:1.5rem;font-weight:900;color:#000;
+  box-shadow:0 0 24px rgba(0,212,255,.4)}
+.sname{font-family:'Orbitron',sans-serif;font-size:.8rem;font-weight:900;letter-spacing:2px;
+  background:linear-gradient(135deg,var(--c),var(--b));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stag{font-size:.6rem;color:var(--t3);letter-spacing:2px;margin-top:2px}
+.isteps{flex:1;padding:16px 0}
+.istep{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:.75rem;
+  color:var(--t3);transition:.3s;position:relative;cursor:default}
+.istep.idone{color:var(--g)}
+.istep.iact{color:var(--c);background:rgba(0,212,255,.05)}
+.istep.iact::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:linear-gradient(180deg,transparent,var(--c),transparent)}
+.inum{width:20px;height:20px;border-radius:50%;border:1px solid currentColor;
+  display:flex;align-items:center;justify-content:center;font-size:.6rem;
+  font-family:'Orbitron',sans-serif;flex-shrink:0;transition:.3s}
+.istep.idone .inum{background:var(--g);border-color:var(--g);color:#000}
+.istep.iact .inum{background:rgba(0,212,255,.12);box-shadow:0 0 8px rgba(0,212,255,.3)}
+.isb-foot{padding:0 14px;font-size:.65rem;color:var(--t3);line-height:1.8}
+.isb-foot strong{color:var(--c)}
+
+/* screens */
+.imain{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.iscreen{display:none;flex:1;flex-direction:column;padding:28px 32px;overflow-y:auto}
+.iscreen.ion{display:flex}
+.stitle{font-family:'Orbitron',sans-serif;font-size:1.2rem;font-weight:800;margin-bottom:5px;
+  background:linear-gradient(135deg,#fff 40%,var(--c));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.ssub{font-size:.82rem;color:var(--t2);margin-bottom:20px;line-height:1.6}
+
+/* footer */
+.ifoot{height:56px;border-top:1px solid var(--border);background:rgba(4,8,16,.8);
+  display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0}
+.ifoot-info{font-size:.68rem;color:var(--t3);letter-spacing:.5px}
+.ibtns{display:flex;gap:8px}
+.ibtn{padding:7px 20px;border-radius:5px;font-family:'Orbitron',sans-serif;font-size:.6rem;
+  font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .2s;border:none;text-transform:uppercase}
+.ibtn-ghost{background:transparent;border:1px solid var(--border);color:var(--t2)}
+.ibtn-ghost:hover{border-color:var(--c);color:var(--c)}
+.ibtn-ghost:disabled{opacity:.3;cursor:not-allowed}
+.ibtn-pri{background:linear-gradient(135deg,var(--c),var(--b));color:#000;box-shadow:0 0 16px rgba(0,212,255,.2)}
+.ibtn-pri:hover{box-shadow:0 0 28px rgba(0,212,255,.45);transform:translateY(-1px)}
+.ibtn-pri:disabled{opacity:.3;cursor:not-allowed;transform:none;box-shadow:none}
+.ibtn-ok{background:linear-gradient(135deg,var(--g),#1aaa2e);color:#000}
+.ibtn-ok:hover{box-shadow:0 0 28px rgba(40,200,64,.4);transform:translateY(-1px)}
+
+/* SCREEN 0 welcome */
+.iwelc{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:0}
+.wglyph{width:76px;height:76px;border-radius:18px;margin-bottom:18px;
+  background:linear-gradient(135deg,var(--c),var(--b),var(--p));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',sans-serif;font-size:2.2rem;font-weight:900;color:#000;
+  box-shadow:0 0 50px rgba(0,212,255,.5);animation:wfloat 3.5s ease-in-out infinite}
+@keyframes wfloat{0%,100%{transform:translateY(0);box-shadow:0 0 50px rgba(0,212,255,.5)}50%{transform:translateY(-8px);box-shadow:0 0 70px rgba(0,212,255,.7)}}
+.wtitle{font-family:'Orbitron',sans-serif;font-size:1.7rem;font-weight:900;letter-spacing:2px;
+  background:linear-gradient(135deg,#fff,var(--c));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+.wver{font-size:.65rem;letter-spacing:3px;color:var(--t3);margin-bottom:14px;font-family:'Share Tech Mono',monospace}
+.wdesc{font-size:.85rem;color:var(--t2);line-height:1.7;max-width:360px;margin:0 auto 20px}
+.wbadges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.wbadge{padding:4px 12px;border-radius:100px;font-size:.63rem;letter-spacing:1.5px;
+  border:1px solid var(--border);color:var(--c);background:rgba(0,212,255,.06);font-family:'Share Tech Mono',monospace}
+
+/* SCREEN 1 license */
+.lbox{flex:1;background:rgba(4,8,16,.8);border:1px solid var(--border);border-radius:8px;
+  padding:18px 22px;overflow-y:auto;font-family:'Share Tech Mono',monospace;font-size:.68rem;
+  color:var(--t2);line-height:1.8;margin-bottom:14px}
+.lbox h3{font-family:'Orbitron',sans-serif;font-size:.7rem;color:var(--c);letter-spacing:2px;margin:14px 0 5px}
+.agrow{display:flex;align-items:center;gap:10px;cursor:pointer;padding:9px 14px;
+  border-radius:8px;border:1px solid var(--border);transition:.2s}
+.agrow:hover{border-color:var(--c);background:rgba(0,212,255,.04)}
+.agrow input{width:16px;height:16px;accent-color:var(--c);cursor:pointer}
+.agrow label{font-size:.8rem;color:var(--t2);cursor:pointer}
+.agrow label strong{color:var(--c)}
+
+/* SCREEN 2 components */
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px}
+.citem{background:rgba(4,8,16,.7);border:1px solid var(--border);border-radius:8px;
+  padding:12px 14px;cursor:pointer;transition:all .2s;display:flex;align-items:flex-start;gap:10px;position:relative}
+.citem.csel{border-color:var(--c);background:rgba(0,212,255,.05)}
+.citem.creq{border-color:rgba(0,212,255,.3);cursor:default}
+.citem input{width:14px;height:14px;accent-color:var(--c);margin-top:2px;flex-shrink:0}
+.citem h4{font-size:.75rem;font-weight:600;margin-bottom:2px}
+.citem p{font-size:.66rem;color:var(--t2);line-height:1.4}
+.csz{position:absolute;top:9px;right:10px;font-size:.6rem;color:var(--t3);font-family:'Share Tech Mono',monospace}
+.creqbadge{position:absolute;bottom:7px;right:10px;font-size:.58rem;color:var(--c);letter-spacing:1px}
+.spbar{background:rgba(4,8,16,.8);border:1px solid var(--border);border-radius:6px;
+  padding:10px 14px;display:flex;align-items:center;gap:12px}
+.sptrack{flex:1;height:5px;background:rgba(0,212,255,.1);border-radius:3px;overflow:hidden}
+.spfill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--c),var(--b));transition:width .4s}
+.sptxt{font-size:.68rem;color:var(--t2);font-family:'Share Tech Mono',monospace;white-space:nowrap}
+
+/* SCREEN 3 dir */
+.dirbox{background:rgba(4,8,16,.8);border:1px solid var(--border);border-radius:8px;
+  padding:12px 14px;display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.dirinput{flex:1;background:transparent;border:none;outline:none;
+  font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--c)}
+.dirbrowse{padding:5px 12px;border-radius:5px;border:1px solid var(--border);
+  background:transparent;color:var(--t2);font-size:.75rem;cursor:pointer;transition:.2s}
+.dirbrowse:hover{border-color:var(--c);color:var(--c)}
+.ogrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px}
+.oitem{background:rgba(4,8,16,.7);border:1px solid var(--border);border-radius:7px;
+  padding:10px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:.2s}
+.oitem:hover{border-color:var(--c)}
+.oitem input{accent-color:var(--c);width:14px;height:14px;cursor:pointer}
+.oitem label{font-size:.75rem;cursor:pointer;color:var(--t2)}
+.iinfopanel{background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.15);border-radius:8px;
+  padding:12px 14px;font-size:.72rem;color:var(--t2);line-height:1.7}
+
+/* SCREEN 4 progress */
+.pwrap{margin-bottom:16px}
+.phead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+.plabel{font-size:.75rem;color:var(--t2)}
+.ppct{font-family:'Share Tech Mono',monospace;font-size:.8rem;color:var(--c)}
+.ptrack{height:8px;background:rgba(0,212,255,.08);border-radius:4px;overflow:hidden;border:1px solid rgba(0,212,255,.1)}
+.pfill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--b),var(--c));transition:width .25s;
+  box-shadow:0 0 10px rgba(0,212,255,.4);position:relative}
+.pfill::after{content:'';position:absolute;top:0;right:0;bottom:0;width:30px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.25));animation:shim 1s infinite}
+@keyframes shim{0%,100%{opacity:0}50%{opacity:1}}
+.subtrack{height:3px;background:rgba(0,212,255,.06);border-radius:2px;overflow:hidden;margin-top:6px}
+.subfill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--p),var(--b));transition:width .12s}
+.curfile{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--t3);margin-top:6px;height:16px;overflow:hidden}
+.ilog{flex:1;background:rgba(2,5,12,.95);border:1px solid var(--border);border-radius:8px;
+  padding:12px 14px;overflow-y:auto;font-family:'Share Tech Mono',monospace;font-size:.65rem;line-height:1.75}
+.logline{display:flex;gap:8px;animation:lin .1s ease}
+@keyframes lin{from{opacity:0;transform:translateX(-3px)}to{opacity:1;transform:none}}
+.lt{color:var(--t3);flex-shrink:0}.lok{color:var(--g)}.linf{color:var(--c)}.lwrn{color:var(--w)}.ldim{color:var(--t3)}.lmsg{color:var(--t2)}
+.sprow{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap}
+.spst{background:rgba(0,212,255,.04);border:1px solid var(--border);border-radius:6px;padding:7px 12px;
+  font-family:'Share Tech Mono',monospace;font-size:.65rem}
+.spst span{color:var(--c);font-size:.78rem;display:block;margin-top:1px}
+
+/* SCREEN 5 complete */
+.complh{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative}
+.chkring{width:84px;height:84px;border-radius:50%;margin:0 auto 20px;
+  background:rgba(40,200,64,.1);border:2px solid var(--g);
+  display:flex;align-items:center;justify-content:center;
+  animation:cpop .6s cubic-bezier(.34,1.56,.64,1) both;box-shadow:0 0 36px rgba(40,200,64,.3)}
+@keyframes cpop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.chkm{font-size:2.2rem;animation:cfade .4s .4s ease both;opacity:0}
+@keyframes cfade{to{opacity:1}}
+.ctitle{font-family:'Orbitron',sans-serif;font-size:1.5rem;font-weight:900;
+  background:linear-gradient(135deg,var(--g),var(--c));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.csub{font-size:.85rem;color:var(--t2);line-height:1.7;max-width:380px;margin:0 auto 20px}
+.cacts{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:16px}
+.cact{background:rgba(4,8,16,.8);border:1px solid var(--border);border-radius:9px;padding:14px 18px;
+  cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:10px;min-width:160px}
+.cact:hover{border-color:var(--c);background:rgba(0,212,255,.05);transform:translateY(-2px)}
+.cact-ico{font-size:1.4rem}
+.cact-inf h4{font-size:.75rem;font-weight:600;margin-bottom:1px}
+.cact-inf p{font-size:.64rem;color:var(--t3)}
+.cnfw{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.cp{position:absolute;border-radius:1px;animation:cfall linear both;top:-10px}
+@keyframes cfall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(650px) rotate(720deg);opacity:0}}
+
+/* ═══════════════════════════════════════════════
+   ENGINE UI
+═══════════════════════════════════════════════ */
+#engine{position:fixed;inset:0;z-index:50;display:none;flex-direction:column}
+#engine.show{display:flex}
+
+/* Engine menubar */
+.emenu{height:30px;background:rgba(3,7,16,.98);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 8px;gap:0;flex-shrink:0;user-select:none}
+.emenu-logo{font-family:'Orbitron',sans-serif;font-size:.65rem;font-weight:900;letter-spacing:2px;
+  background:linear-gradient(135deg,var(--c),var(--b));-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  padding:0 12px;border-right:1px solid var(--border);margin-right:6px}
+.emenu-item{padding:0 10px;font-size:.72rem;color:var(--t2);cursor:pointer;height:100%;
+  display:flex;align-items:center;transition:.15s;position:relative;letter-spacing:.5px}
+.emenu-item:hover{color:var(--c);background:rgba(0,212,255,.06)}
+.emenu-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.coins-display{display:flex;align-items:center;gap:6px;padding:3px 10px;
+  background:rgba(254,188,46,.08);border:1px solid rgba(254,188,46,.25);border-radius:100px;
+  font-family:'Share Tech Mono',monospace;font-size:.72rem;cursor:pointer;transition:.2s}
+.coins-display:hover{border-color:var(--w);background:rgba(254,188,46,.12)}
+.coin-ico{color:var(--w);font-size:.8rem}
+.coin-amt{color:var(--w);font-weight:700}
+.ebtn-play{padding:4px 14px;border-radius:4px;background:linear-gradient(135deg,var(--g),#1aaa2e);
+  border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:2px;
+  cursor:pointer;transition:.2s;font-weight:700}
+.ebtn-play:hover{box-shadow:0 0 16px rgba(40,200,64,.5)}
+.ebtn-store{padding:4px 14px;border-radius:4px;background:linear-gradient(135deg,var(--c),var(--b));
+  border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:2px;
+  cursor:pointer;transition:.2s;font-weight:700}
+.ebtn-store:hover{box-shadow:0 0 16px rgba(0,212,255,.5)}
+
+/* Engine toolbar */
+.etool{height:36px;background:rgba(5,10,22,.95);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 10px;gap:6px;flex-shrink:0}
+.etbtn{width:26px;height:26px;border-radius:5px;border:1px solid var(--border);
+  background:transparent;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;
+  font-size:.75rem;color:var(--t2)}
+.etbtn:hover,.etbtn.on{background:rgba(0,212,255,.1);border-color:var(--c);color:var(--c)}
+.etool-sep{width:1px;height:20px;background:var(--border);margin:0 4px}
+.etool-label{font-size:.65rem;color:var(--t3);letter-spacing:1px;text-transform:uppercase;margin:0 4px}
+
+/* Engine main layout */
+.elayout{flex:1;display:grid;grid-template-columns:200px 1fr 240px;grid-template-rows:1fr 180px;overflow:hidden}
+
+/* Panels */
+.epanel{background:rgba(5,10,22,.95);border:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column}
+.epanel-title{
+  height:28px;background:rgba(3,7,16,.9);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 10px;gap:6px;flex-shrink:0;
+  font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:2px;color:var(--t3);text-transform:uppercase}
+.epanel-title .dot3{width:7px;height:7px;border-radius:50%;background:var(--c);box-shadow:0 0 6px var(--c)}
+
+/* Hierarchy panel */
+.hier{grid-column:1;grid-row:1;border-right:none;border-bottom:none}
+.hier-item{display:flex;align-items:center;gap:7px;padding:5px 10px;cursor:pointer;
+  font-size:.75rem;color:var(--t2);transition:.15s;border-bottom:1px solid rgba(0,212,255,.04)}
+.hier-item:hover{background:rgba(0,212,255,.05);color:var(--t1)}
+.hier-item.hsel{background:rgba(0,212,255,.08);color:var(--c);border-color:rgba(0,212,255,.12)}
+.hier-ico{width:18px;height:18px;border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.7rem}
+.hier-vis{margin-left:auto;font-size:.6rem;opacity:.4;transition:.15s}
+.hier-item:hover .hier-vis{opacity:1}
+
+/* Viewport */
+.viewport{grid-column:2;grid-row:1;position:relative;overflow:hidden;border:none}
+.vp-canvas{width:100%;height:100%}
+.vp-overlay{position:absolute;inset:0;pointer-events:none}
+.vp-tl{position:absolute;top:10px;left:10px;display:flex;gap:6px;pointer-events:all}
+.vp-tr{position:absolute;top:10px;right:10px;display:flex;gap:6px;pointer-events:all;flex-direction:column;align-items:flex-end}
+.vp-bl{position:absolute;bottom:10px;left:10px;display:flex;gap:6px;pointer-events:all}
+.vp-br{position:absolute;bottom:10px;right:10px;display:flex;gap:6px;pointer-events:all}
+.vptag{background:rgba(4,8,16,.8);border:1px solid var(--border);border-radius:5px;
+  padding:3px 9px;font-size:.62rem;font-family:'Orbitron',sans-serif;letter-spacing:1px;color:var(--t3)}
+.vptag.active{color:var(--c);border-color:rgba(0,212,255,.3)}
+.vpbtn{width:26px;height:26px;background:rgba(4,8,16,.8);border:1px solid var(--border);
+  border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.75rem;transition:.15s}
+.vpbtn:hover{border-color:var(--c);color:var(--c)}
+.vp-gizmo{position:absolute;bottom:10px;right:10px;width:60px;height:60px}
+
+/* Properties panel */
+.props{grid-column:3;grid-row:1;border-left:none;border-bottom:none}
+.props-scroll{flex:1;overflow-y:auto;padding:8px}
+.prop-section{margin-bottom:12px}
+.prop-sh{font-size:.6rem;letter-spacing:2px;color:var(--t3);text-transform:uppercase;
+  margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid rgba(0,212,255,.06);
+  display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.prop-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.prop-key{font-size:.7rem;color:var(--t2)}
+.prop-val{font-family:'Share Tech Mono',monospace;font-size:.68rem;
+  background:rgba(0,212,255,.08);border:1px solid var(--border);border-radius:3px;
+  padding:2px 7px;color:var(--c);cursor:text;min-width:70px;text-align:right}
+.prop-val:focus{outline:none;border-color:var(--c)}
+.prop-slider{width:100%;height:4px;appearance:none;background:rgba(0,212,255,.15);border-radius:2px;cursor:pointer;margin-bottom:5px}
+.prop-slider::-webkit-slider-thumb{appearance:none;width:10px;height:10px;border-radius:50%;background:var(--c);cursor:pointer}
+.mat-preview{width:100%;height:70px;border-radius:7px;border:1px solid var(--border);margin-bottom:8px;position:relative;overflow:hidden}
+.mat-swatch{width:28px;height:28px;border-radius:5px;border:2px solid var(--border);cursor:pointer;transition:.2s;flex-shrink:0}
+.mat-swatch:hover{transform:scale(1.1);border-color:var(--c)}
+.mat-swatch.msel{border-color:var(--c);box-shadow:0 0 8px rgba(0,212,255,.4)}
+.mat-swatches{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.mat-apply{width:100%;padding:6px;background:linear-gradient(135deg,var(--c),var(--b));
+  border:none;border-radius:5px;color:#000;font-family:'Orbitron',sans-serif;
+  font-size:.6rem;letter-spacing:2px;cursor:pointer;transition:.2s;font-weight:700}
+.mat-apply:hover{box-shadow:0 0 12px rgba(0,212,255,.4)}
+
+/* Bottom asset browser */
+.assetbar{grid-column:1/-1;grid-row:2;border-top:1px solid var(--border);display:flex;flex-direction:column}
+.abtabs{height:28px;background:rgba(3,7,16,.9);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 10px;gap:0;flex-shrink:0}
+.abtab{padding:0 14px;height:100%;display:flex;align-items:center;font-size:.68rem;
+  color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:.15s;letter-spacing:.5px}
+.abtab:hover{color:var(--t2)}
+.abtab.abon{color:var(--c);border-color:var(--c)}
+.abcont{flex:1;overflow:hidden}
+.abtab-content{display:none;height:100%;padding:8px 10px;overflow-x:auto;overflow-y:hidden}
+.abtab-content.abon{display:flex;gap:8px;align-items:center}
+.abasset{width:110px;flex-shrink:0;background:rgba(4,8,16,.8);border:1px solid var(--border);
+  border-radius:7px;overflow:hidden;cursor:pointer;transition:all .2s;height:130px;display:flex;flex-direction:column}
+.abasset:hover{border-color:var(--border2);transform:translateY(-2px)}
+.abasset.absel{border-color:var(--c)}
+.ab-thumb{height:72px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:2rem;position:relative}
+.ab-info{padding:5px 7px;flex:1}
+.ab-name{font-size:.62rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px}
+.ab-type{font-size:.58rem;color:var(--t3)}
+.ab-owned{position:absolute;top:4px;right:4px;background:rgba(40,200,64,.2);border:1px solid var(--g);
+  border-radius:3px;padding:1px 5px;font-size:.55rem;color:var(--g);font-family:'Share Tech Mono',monospace}
+
+/* ═══════════════════════════════════════════════
+   SHOP OVERLAY
+═══════════════════════════════════════════════ */
+#shop{position:fixed;inset:0;z-index:200;background:rgba(2,5,12,.92);backdrop-filter:blur(12px);
+  display:none;flex-direction:column}
+#shop.show{display:flex}
+.shop-top{height:54px;background:rgba(4,8,16,.98);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;gap:16px;flex-shrink:0}
+.shop-logo{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;letter-spacing:3px;
+  background:linear-gradient(135deg,var(--c),var(--b),var(--p));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.shop-search{flex:1;max-width:380px;background:rgba(5,10,22,.9);border:1px solid var(--border);
+  border-radius:6px;padding:7px 14px;color:var(--t1);font-family:'Rajdhani',sans-serif;font-size:.85rem;outline:none}
+.shop-search:focus{border-color:var(--c)}
+.shop-coins{display:flex;align-items:center;gap:8px;padding:5px 14px;margin-left:auto;
+  background:rgba(254,188,46,.1);border:1px solid rgba(254,188,46,.3);border-radius:100px;
+  font-family:'Orbitron',sans-serif;font-size:.75rem;color:var(--w)}
+.shop-close{width:34px;height:34px;border-radius:7px;border:1px solid var(--border);
+  background:transparent;color:var(--t2);cursor:pointer;transition:.2s;font-size:.9rem}
+.shop-close:hover{border-color:var(--r);color:var(--r)}
+.shop-body{flex:1;display:grid;grid-template-columns:180px 1fr 280px;overflow:hidden}
+
+/* Shop sidebar */
+.shop-sb{background:rgba(4,8,16,.9);border-right:1px solid var(--border);padding:14px 0;overflow-y:auto}
+.shop-cat-title{font-size:.6rem;letter-spacing:2px;color:var(--t3);text-transform:uppercase;
+  padding:0 16px;margin-bottom:8px}
+.shop-cat{display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer;
+  font-size:.78rem;color:var(--t2);transition:.2s;border-left:2px solid transparent}
+.shop-cat:hover{color:var(--t1);background:rgba(0,212,255,.04)}
+.shop-cat.scon{color:var(--c);border-color:var(--c);background:rgba(0,212,255,.06)}
+.shop-cat-ico{font-size:1rem;width:22px;text-align:center}
+.shop-cat-cnt{margin-left:auto;font-size:.65rem;font-family:'Share Tech Mono',monospace;color:var(--t3)}
+.shop-tags{padding:14px 16px 0;border-top:1px solid rgba(0,212,255,.06);margin-top:10px}
+.shop-tag{display:inline-block;padding:3px 9px;border-radius:100px;font-size:.62rem;
+  border:1px solid var(--border);color:var(--t3);margin:3px 2px;cursor:pointer;transition:.2s}
+.shop-tag:hover,.shop-tag.ston{border-color:var(--c);color:var(--c);background:rgba(0,212,255,.06)}
+
+/* Shop main */
+.shop-main{overflow-y:auto;padding:16px}
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:12px}
+.shop-item{background:rgba(8,15,28,.9);border:1px solid var(--border);border-radius:10px;
+  overflow:hidden;cursor:pointer;transition:all .25s;position:relative}
+.shop-item:hover{transform:translateY(-4px);border-color:var(--border2);box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.shop-item.sowned{border-color:rgba(40,200,64,.3)}
+.shop-item-thumb{height:120px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.shop-item-badge{position:absolute;top:7px;left:7px;padding:2px 8px;border-radius:100px;
+  font-size:.58rem;font-family:'Orbitron',sans-serif;letter-spacing:1px;font-weight:700}
+.badge-free{background:rgba(40,200,64,.2);border:1px solid var(--g);color:var(--g)}
+.badge-sale{background:rgba(255,64,64,.2);border:1px solid var(--r);color:var(--r)}
+.badge-new{background:rgba(0,212,255,.2);border:1px solid var(--c);color:var(--c)}
+.badge-owned{background:rgba(40,200,64,.15);border:1px solid var(--g);color:var(--g)}
+.shop-item-info{padding:10px 12px}
+.shop-item-name{font-size:.8rem;font-weight:600;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.shop-item-cat{font-size:.65rem;color:var(--t3);margin-bottom:6px}
+.shop-item-foot{display:flex;justify-content:space-between;align-items:center}
+.shop-stars{color:var(--w);font-size:.68rem;letter-spacing:1px}
+.shop-price{font-family:'Orbitron',sans-serif;font-size:.75rem;color:var(--w)}
+.shop-price.spfree{color:var(--g)}
+.shop-price.spowned{color:var(--g);font-size:.68rem}
+
+/* Shop cart/detail panel */
+.shop-cart{background:rgba(4,8,16,.95);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden}
+.sc-title{padding:14px 16px;border-bottom:1px solid var(--border);font-family:'Orbitron',sans-serif;
+  font-size:.72rem;letter-spacing:2px;color:var(--c);display:flex;justify-content:space-between;align-items:center}
+.sc-items{flex:1;overflow-y:auto;padding:10px 12px}
+.sc-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:var(--t3);font-size:.78rem;gap:8px}
+.sc-item{background:rgba(8,15,28,.8);border:1px solid var(--border);border-radius:8px;
+  padding:10px 12px;margin-bottom:8px;display:flex;gap:10px;align-items:center}
+.sc-item-ico{font-size:1.6rem;flex-shrink:0}
+.sc-item-info{flex:1;min-width:0}
+.sc-item-name{font-size:.75rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc-item-price{font-size:.7rem;color:var(--w);font-family:'Share Tech Mono',monospace}
+.sc-item-del{background:transparent;border:none;color:var(--t3);cursor:pointer;font-size:.8rem;transition:.2s;flex-shrink:0}
+.sc-item-del:hover{color:var(--r)}
+.sc-total{padding:12px 16px;border-top:1px solid var(--border)}
+.sc-total-row{display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:5px;color:var(--t2)}
+.sc-total-row.main{color:var(--t1);font-size:.85rem;font-weight:600;margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,212,255,.08)}
+.sc-total-val{font-family:'Share Tech Mono',monospace;color:var(--w)}
+.sc-checkout{width:100%;padding:10px;background:linear-gradient(135deg,var(--w),#e8a800);
+  border:none;border-radius:7px;color:#000;font-family:'Orbitron',sans-serif;
+  font-size:.7rem;letter-spacing:2px;cursor:pointer;transition:.2s;font-weight:700;margin-top:10px}
+.sc-checkout:hover{box-shadow:0 0 20px rgba(254,188,46,.4);transform:translateY(-1px)}
+.sc-checkout:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* Item detail overlay inside shop */
+.item-detail{position:fixed;inset:0;z-index:300;background:rgba(2,4,12,.93);
+  backdrop-filter:blur(16px);display:none;flex-direction:column;align-items:center;justify-content:center}
+.item-detail.show{display:flex}
+.id-card{background:rgba(8,15,28,.98);border:1px solid var(--border);border-radius:14px;
+  width:620px;max-width:95vw;max-height:90vh;overflow:hidden;display:flex;flex-direction:column}
+.id-top{height:220px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.id-body{flex:1;padding:24px 28px;overflow-y:auto}
+.id-name{font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:5px}
+.id-meta{display:flex;gap:12px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.id-tag{padding:2px 10px;border-radius:100px;font-size:.65rem;border:1px solid var(--border);color:var(--t2)}
+.id-desc{font-size:.84rem;color:var(--t2);line-height:1.7;margin-bottom:16px}
+.id-features{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px}
+.id-feat{display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--t2)}
+.id-feat::before{content:'✓';color:var(--g);font-size:.7rem}
+.id-foot{display:flex;justify-content:space-between;align-items:center;padding:16px 28px;
+  border-top:1px solid var(--border);background:rgba(4,8,16,.9)}
+.id-price-big{font-family:'Orbitron',sans-serif;font-size:1.2rem;color:var(--w)}
+.id-price-big.free{color:var(--g)}
+.id-close{position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:6px;
+  background:rgba(4,8,16,.8);border:1px solid var(--border);color:var(--t2);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:.2s;z-index:1}
+.id-close:hover{border-color:var(--r);color:var(--r)}
+
+/* Toast notifications */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);
+  background:rgba(8,15,28,.98);border:1px solid var(--border);border-radius:9px;
+  padding:10px 20px;font-size:.78rem;z-index:9999;transition:.4s;
+  display:flex;align-items:center;gap:10px;pointer-events:none;white-space:nowrap;
+  box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.tok{border-color:var(--g);color:var(--g)}
+.toast.twrn{border-color:var(--w);color:var(--w)}
+.toast.terr{border-color:var(--r);color:var(--r)}
+
+/* Scrollbars */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(0,212,255,.2);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:rgba(0,212,255,.35)}
+
+/* Color picker for materials */
+input[type=color]{width:28px;height:22px;padding:1px;border-radius:4px;border:1px solid var(--border);
+  background:transparent;cursor:pointer}
+</style>
+</head>
+<body>
+
+<canvas id="bgc"></canvas>
+
+<!-- ═══════════════════════ INSTALLER ═══════════════════════ -->
+<div id="installer">
+<div class="iwin">
+  <div class="itb">
+    <div class="dots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div>
+    <div class="itb-title">SETH ENGINE INSTALLER</div>
+    <div class="itb-ver">v2.5.1 — Build 20250528</div>
+  </div>
+  <div class="ibody">
+    <div class="isb">
+      <div class="isb-brand">
+        <div class="slogo">S</div>
+        <div class="sname">SETH ENGINE</div>
+        <div class="stag">INSTALLER v2.5.1</div>
+      </div>
+      <div class="isteps" id="isteps">
+        <div class="istep iact" data-i="0"><div class="inum" id="in0">1</div><span>Welcome</span></div>
+        <div class="istep" data-i="1"><div class="inum" id="in1">2</div><span>License</span></div>
+        <div class="istep" data-i="2"><div class="inum" id="in2">3</div><span>Components</span></div>
+        <div class="istep" data-i="3"><div class="inum" id="in3">4</div><span>Location</span></div>
+        <div class="istep" data-i="4"><div class="inum" id="in4">5</div><span>Installing</span></div>
+        <div class="istep" data-i="5"><div class="inum" id="in5">6</div><span>Complete</span></div>
+      </div>
+      <div class="isb-foot">Free · Always<br><strong>seth-engine.io</strong><br>© 2025 Seth Engine</div>
+    </div>
+    <div class="imain">
+      <!-- S0 WELCOME -->
+      <div class="iscreen ion" id="is0">
+        <div class="iwelc">
+          <div class="wglyph">S</div>
+          <div class="wtitle">SETH ENGINE</div>
+          <div class="wver">VERSION 2.5.1 · BUILD 20250528</div>
+          <p class="wdesc">Welcome! This installer will set up the world's most beginner-friendly game engine — with AI tools, a full asset shop, material editor, and multiplayer SDK.</p>
+          <div class="wbadges">
+            <div class="wbadge">AI TOOLS</div><div class="wbadge">SHOP INCLUDED</div>
+            <div class="wbadge">VR READY</div><div class="wbadge">ALWAYS FREE</div>
+          </div>
+        </div>
+      </div>
+      <!-- S1 LICENSE -->
+      <div class="iscreen" id="is1">
+        <div class="stitle">License Agreement</div>
+        <p class="ssub">Read and accept the EULA to continue installation.</p>
+        <div class="lbox">
+          <h3>SETH ENGINE — END USER LICENSE AGREEMENT</h3>
+          <p>By installing SETH ENGINE you agree to these terms. Games made with SETH ENGINE can be sold freely with 0% royalties.</p>
+          <h3>1. GRANT OF LICENSE</h3>
+          <p>You may install, use, and create commercial games with SETH ENGINE for free. No royalties, no revenue share, no subscriptions.</p>
+          <h3>2. SHOP & ASSETS</h3>
+          <p>Assets purchased from the SETH Store may be used in projects. SethCoins are virtual currency for in-engine purchases. Purchases are non-refundable unless the asset is defective.</p>
+          <h3>3. AI TOOLS</h3>
+          <p>AI-generated code belongs entirely to you. Anonymized prompts may be used to improve the AI model. Telemetry can be disabled in Settings > Privacy.</p>
+          <h3>4. MULTIPLAYER SDK</h3>
+          <p>Free tier: up to 100 concurrent players. Premium: unlimited. No per-connection fees for free tier games.</p>
+          <h3>5. RESTRICTIONS</h3>
+          <p>Do not redistribute SETH ENGINE itself as a standalone product or claim ownership of the engine. Do not use for malware or illegal content.</p>
+          <h3>6. WARRANTY</h3>
+          <p>SETH ENGINE is provided AS IS. No warranty is provided beyond what is required by law in your jurisdiction.</p>
+        </div>
+        <div class="agrow" onclick="toggleAgree()">
+          <input type="checkbox" id="agchk">
+          <label for="agchk">I accept the <strong>SETH ENGINE EULA</strong> and understand SethCoins terms</label>
+        </div>
+      </div>
+      <!-- S2 COMPONENTS -->
+      <div class="iscreen" id="is2">
+        <div class="stitle">Select Components</div>
+        <p class="ssub">Choose what to install. The Shop, Materials Editor and Asset Browser are always included.</p>
+        <div class="cgrid" id="cgrid">
+          <div class="citem csel creq"><input type="checkbox" checked disabled><div><h4>Core Engine + Editor</h4><p>Scene editor, renderer, physics, audio engine</p></div><div class="csz">1.4 GB</div><div class="creqbadge">REQUIRED</div></div>
+          <div class="citem csel creq"><input type="checkbox" checked disabled><div><h4>SETH Store + Materials</h4><p>Asset shop, material editor, 500+ coin welcome gift</p></div><div class="csz">180 MB</div><div class="creqbadge">REQUIRED</div></div>
+          <div class="citem csel" onclick="toggleComp(this)"><input type="checkbox" checked><div><h4>Visual Script Editor</h4><p>Node-based blueprint system</p></div><div class="csz">240 MB</div></div>
+          <div class="citem csel" onclick="toggleComp(this)"><input type="checkbox" checked><div><h4>AI Assistant</h4><p>Code gen, debug, scene building AI</p></div><div class="csz">380 MB</div></div>
+          <div class="citem csel" onclick="toggleComp(this)"><input type="checkbox" checked><div><h4>Multiplayer SDK</h4><p>Networking, lobbies, voice, anti-cheat</p></div><div class="csz">160 MB</div></div>
+          <div class="citem csel" onclick="toggleComp(this)"><input type="checkbox" checked><div><h4>VR / AR Toolkit</h4><p>Oculus, SteamVR, WebXR support</p></div><div class="csz">210 MB</div></div>
+          <div class="citem" onclick="toggleComp(this)"><input type="checkbox"><div><h4>Sample Projects (5)</h4><p>Platformer, RPG, FPS, Racing, VR demos</p></div><div class="csz">620 MB</div></div>
+          <div class="citem csel" onclick="toggleComp(this)"><input type="checkbox" checked><div><h4>Mobile + Web Export</h4><p>Android, iOS, WebGL build tools</p></div><div class="csz">280 MB</div></div>
+        </div>
+        <div class="spbar"><div style="font-size:.68rem;color:var(--t2);white-space:nowrap">Disk</div><div class="sptrack"><div class="spfill" id="spfill" style="width:55%"></div></div><div class="sptxt" id="sptxt">2.65 GB / 238 GB free</div></div>
+      </div>
+      <!-- S3 DIRECTORY -->
+      <div class="iscreen" id="is3">
+        <div class="stitle">Install Location</div>
+        <p class="ssub">Choose where SETH ENGINE will be installed.</p>
+        <div class="dirbox"><span style="color:var(--t3);font-family:'Share Tech Mono',monospace">📁</span><input class="dirinput" id="dirinput" value="C:\Program Files\Seth Engine\v2.5.1" spellcheck="false"><button class="dirbrowse" onclick="cycleDir()">Browse…</button></div>
+        <div style="font-size:.7rem;color:var(--t3);margin-bottom:16px;font-family:'Share Tech Mono',monospace">Required: 2.65 GB · Available: <span style="color:var(--g)">238.4 GB</span></div>
+        <div class="ogrid">
+          <div class="oitem"><input type="checkbox" id="o1" checked><label for="o1">Create Desktop Shortcut</label></div>
+          <div class="oitem"><input type="checkbox" id="o2" checked><label for="o2">Add to PATH variable</label></div>
+          <div class="oitem"><input type="checkbox" id="o3" checked><label for="o3">Launch engine after install</label></div>
+          <div class="oitem"><input type="checkbox" id="o4" checked><label for="o4">Associate .seth files</label></div>
+          <div class="oitem"><input type="checkbox" id="o5" checked><label for="o5">Enable auto-updates</label></div>
+          <div class="oitem"><input type="checkbox" id="o6"><label for="o6">Pin to taskbar</label></div>
+        </div>
+        <div class="iinfopanel">SETH ENGINE will be installed to the selected directory. Your projects are saved to <strong>Documents/SethEngine/Projects</strong> — this includes assets purchased from the SETH Store.</div>
+      </div>
+      <!-- S4 PROGRESS -->
+      <div class="iscreen" id="is4">
+        <div class="stitle" id="ititle">Installing SETH ENGINE…</div>
+        <p class="ssub" id="isub">Please wait while files are extracted and configured.</p>
+        <div class="pwrap">
+          <div class="phead"><span class="plabel" id="plabel">Preparing…</span><span class="ppct" id="ppct">0%</span></div>
+          <div class="ptrack"><div class="pfill" id="pfill" style="width:0%"></div></div>
+          <div class="subtrack"><div class="subfill" id="sfill" style="width:0%"></div></div>
+          <div class="curfile" id="cfile"></div>
+        </div>
+        <div class="sprow">
+          <div class="spst">Speed<span id="spd">— MB/s</span></div>
+          <div class="spst">Written<span id="wrt">0 MB</span></div>
+          <div class="spst">Remaining<span id="rem">Calc…</span></div>
+          <div class="spst">Files<span id="fct">0/0</span></div>
+        </div>
+        <div class="ilog" id="ilog" style="margin-top:12px;flex:1"></div>
+      </div>
+      <!-- S5 COMPLETE -->
+      <div class="iscreen" id="is5">
+        <div class="complh">
+          <div class="cnfw" id="cnfw"></div>
+          <div class="chkring"><div class="chkm">✓</div></div>
+          <div class="ctitle">Installation Complete!</div>
+          <p class="csub">SETH ENGINE v2.5.1 is ready. Your account starts with <strong style="color:var(--w)">500 SethCoins</strong> — head to the SETH Store to grab some free assets!</p>
+          <div class="cacts">
+            <div class="cact" onclick="launchEngine()"><div class="cact-ico">🚀</div><div class="cact-inf"><h4>Launch Engine</h4><p>Start building now</p></div></div>
+            <div class="cact" onclick="launchEngine()"><div class="cact-ico">🛍</div><div class="cact-inf"><h4>Open SETH Store</h4><p>500 coins waiting</p></div></div>
+          </div>
+          <div style="font-size:.68rem;color:var(--t3);font-family:'Share Tech Mono',monospace">Installed → <span style="color:var(--c)" id="finaldir"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="ifoot">
+    <div class="ifoot-info" id="iinfo">Build Worlds Without Limits.</div>
+    <div class="ibtns">
+      <button class="ibtn ibtn-ghost" id="iback" onclick="igoBack()" disabled>← Back</button>
+      <button class="ibtn ibtn-pri" id="inext" onclick="igoNext()">Get Started →</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════ ENGINE ═══════════════════════ -->
+<div id="engine">
+  <!-- Menu bar -->
+  <div class="emenu">
+    <div class="emenu-logo">SETH ENGINE</div>
+    <div class="emenu-item" onclick="showToast('File menu','inf')">File</div>
+    <div class="emenu-item" onclick="showToast('Edit menu','inf')">Edit</div>
+    <div class="emenu-item" onclick="showToast('View menu','inf')">View</div>
+    <div class="emenu-item" onclick="showToast('Assets menu','inf')">Assets</div>
+    <div class="emenu-item" onclick="openShop()">Store</div>
+    <div class="emenu-item" onclick="showToast('Help & Docs','inf')">Help</div>
+    <div class="emenu-right">
+      <div class="coins-display" onclick="openShop()">
+        <span class="coin-ico">🪙</span>
+        <span class="coin-amt" id="coinDisp">500</span>
+        <span style="font-size:.62rem;color:var(--t3)">SC</span>
+      </div>
+      <button class="ebtn-store" onclick="openShop()">🛍 SETH STORE</button>
+      <button class="ebtn-play" onclick="playScene()">▶ PLAY</button>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="etool">
+    <button class="etbtn on" title="Select" onclick="setTool(this,'select')">↖</button>
+    <button class="etbtn" title="Move" onclick="setTool(this,'move')">✛</button>
+    <button class="etbtn" title="Rotate" onclick="setTool(this,'rotate')">↻</button>
+    <button class="etbtn" title="Scale" onclick="setTool(this,'scale')">⤡</button>
+    <div class="etool-sep"></div>
+    <button class="etbtn" title="Add Mesh" onclick="addObject('Mesh')">⬡</button>
+    <button class="etbtn" title="Add Light" onclick="addObject('Light')">💡</button>
+    <button class="etbtn" title="Add Camera" onclick="addObject('Camera')">📷</button>
+    <button class="etbtn" title="Add Terrain" onclick="addObject('Terrain')">🏔</button>
+    <div class="etool-sep"></div>
+    <div class="etool-label">Shading:</div>
+    <button class="etbtn on" id="shadeWire" title="Wireframe" onclick="setShading('Wireframe',this)">⬡</button>
+    <button class="etbtn" id="shadeSolid" title="Solid" onclick="setShading('Solid',this)">⬢</button>
+    <button class="etbtn" id="shadeMat" title="Material" onclick="setShading('Material',this)">◈</button>
+    <div class="etool-sep"></div>
+    <div class="etool-label">Snapping: ON</div>
+    <div style="margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--t3)" id="fpsCounter">FPS: 60 | Tris: 12.4k | Draw: 28</div>
+  </div>
+
+  <!-- Main layout -->
+  <div class="elayout">
+    <!-- Hierarchy -->
+    <div class="epanel hier">
+      <div class="epanel-title"><div class="dot3"></div>HIERARCHY</div>
+      <div style="flex:1;overflow-y:auto" id="hierList"></div>
+    </div>
+
+    <!-- Viewport -->
+    <div class="viewport epanel" style="border:none">
+      <canvas class="vp-canvas" id="vpc"></canvas>
+      <div class="vp-overlay">
+        <div class="vp-tl">
+          <div class="vptag active" id="viewMode">PERSPECTIVE</div>
+          <div class="vptag" id="shadingMode">MATERIAL</div>
+        </div>
+        <div class="vp-tr">
+          <div class="vptag" style="color:var(--g)">🟢 Scene Active</div>
+          <div class="vptag" id="selInfo" style="display:none;color:var(--c)"></div>
+        </div>
+        <div class="vp-bl">
+          <div class="vpbtn" title="Top view" onclick="setView('Top')">⊤</div>
+          <div class="vpbtn" title="Front view" onclick="setView('Front')">⊞</div>
+          <div class="vpbtn" title="Side view" onclick="setView('Side')">⊟</div>
+          <div class="vpbtn" title="Camera view" onclick="setView('Camera')">📷</div>
+        </div>
+        <div class="vp-br">
+          <div class="vpbtn" onclick="vpZoom(1.2)">+</div>
+          <div class="vpbtn" onclick="vpZoom(0.8)">−</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Properties -->
+    <div class="epanel props">
+      <div class="epanel-title"><div class="dot3" style="background:var(--p);box-shadow:0 0 6px var(--p)"></div>PROPERTIES</div>
+      <div class="props-scroll" id="propsScroll">
+        <div style="padding:30px 0;text-align:center;color:var(--t3);font-size:.75rem">
+          Select an object<br>to edit properties
+        </div>
+      </div>
+    </div>
+
+    <!-- Asset browser -->
+    <div class="assetbar">
+      <div class="abtabs">
+        <div class="abtab abon" onclick="switchABTab(this,'ab-scene')">Scene Assets</div>
+        <div class="abtab" onclick="switchABTab(this,'ab-mats')">Materials</div>
+        <div class="abtab" onclick="switchABTab(this,'ab-maps')">Maps</div>
+        <div class="abtab" onclick="switchABTab(this,'ab-owned')">My Library</div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:6px;padding:0 10px">
+          <button class="etbtn" style="font-size:.6rem;padding:0 8px;width:auto" onclick="openShop()">+ Get More</button>
+        </div>
+      </div>
+      <div class="abcont">
+        <div class="abtab-content abon" id="ab-scene"></div>
+        <div class="abtab-content" id="ab-mats"></div>
+        <div class="abtab-content" id="ab-maps"></div>
+        <div class="abtab-content" id="ab-owned"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SHOP ═══════════════════════ -->
+<div id="shop">
+  <div class="shop-top">
+    <div class="shop-logo">⚡ SETH STORE</div>
+    <input class="shop-search" id="shopSearch" placeholder="🔍  Search maps, materials, tools, characters…" oninput="filterShop()">
+    <div class="shop-coins">🪙 <span id="shopCoins">500</span> SethCoins</div>
+    <button class="shop-close" onclick="closeShop()">✕</button>
+  </div>
+  <div class="shop-body">
+    <!-- Sidebar -->
+    <div class="shop-sb">
+      <div class="shop-cat-title">CATEGORIES</div>
+      <div class="shop-cat scon" onclick="filterCat('all',this)"><span class="shop-cat-ico">🏪</span>All Items<span class="shop-cat-cnt" id="cnt-all">72</span></div>
+      <div class="shop-cat" onclick="filterCat('maps',this)"><span class="shop-cat-ico">🗺</span>Maps & Worlds<span class="shop-cat-cnt">16</span></div>
+      <div class="shop-cat" onclick="filterCat('materials',this)"><span class="shop-cat-ico">🎨</span>Materials<span class="shop-cat-cnt">18</span></div>
+      <div class="shop-cat" onclick="filterCat('tools',this)"><span class="shop-cat-ico">🔧</span>Tools & Plugins<span class="shop-cat-cnt">12</span></div>
+      <div class="shop-cat" onclick="filterCat('characters',this)"><span class="shop-cat-ico">🧑</span>Characters<span class="shop-cat-cnt">10</span></div>
+      <div class="shop-cat" onclick="filterCat('vfx',this)"><span class="shop-cat-ico">✨</span>VFX & Particles<span class="shop-cat-cnt">8</span></div>
+      <div class="shop-cat" onclick="filterCat('audio',this)"><span class="shop-cat-ico">🎵</span>Audio & Music<span class="shop-cat-cnt">6</span></div>
+      <div class="shop-cat" onclick="filterCat('templates',this)"><span class="shop-cat-ico">🎮</span>Game Templates<span class="shop-cat-cnt">2</span></div>
+      <div class="shop-tags">
+        <div class="shop-cat-title" style="margin-bottom:6px">QUICK FILTERS</div>
+        <span class="shop-tag ston" onclick="toggleTag(this,'free')">Free</span>
+        <span class="shop-tag" onclick="toggleTag(this,'sale')">On Sale</span>
+        <span class="shop-tag" onclick="toggleTag(this,'new')">New</span>
+        <span class="shop-tag" onclick="toggleTag(this,'owned')">Owned</span>
+        <span class="shop-tag" onclick="toggleTag(this,'4star')">4★+</span>
+      </div>
+    </div>
+
+    <!-- Main grid -->
+    <div class="shop-main" id="shopMain">
+      <div class="shop-grid" id="shopGrid"></div>
+    </div>
+
+    <!-- Cart -->
+    <div class="shop-cart">
+      <div class="sc-title">🛒 CART <span style="color:var(--t3);font-size:.65rem" id="cartCount">0 items</span></div>
+      <div class="sc-items" id="cartItems">
+        <div class="sc-empty">🛒<span>Your cart is empty</span><span style="font-size:.65rem;color:var(--t3)">Browse and add items!</span></div>
+      </div>
+      <div class="sc-total">
+        <div class="sc-total-row"><span>Subtotal</span><span class="sc-total-val"><span id="subtotal">0</span> SC</span></div>
+        <div class="sc-total-row"><span>Discount</span><span class="sc-total-val" style="color:var(--g)">−<span id="discount">0</span> SC</span></div>
+        <div class="sc-total-row main"><span>Total</span><span class="sc-total-val"><span id="cartTotal">0</span> SC</span></div>
+        <button class="sc-checkout" id="checkoutBtn" onclick="checkout()" disabled>💳 PURCHASE — 0 SC</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Item Detail -->
+<div class="item-detail" id="itemDetail">
+  <div class="id-card">
+    <div class="id-top" id="idTop"><button class="id-close" onclick="closeDetail()">✕</button></div>
+    <div class="id-body" id="idBody"></div>
+    <div class="id-foot" id="idFoot"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════ PARTICLES ═══════════════
+const bgc=document.getElementById('bgc');
+const bctx=bgc.getContext('2d');
+let pts=[];
+function rsz(){bgc.width=innerWidth;bgc.height=innerHeight}
+rsz();addEventListener('resize',rsz);
+for(let i=0;i<80;i++) pts.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*1.2+.3,a:Math.random()*.35+.08,c:['#00d4ff','#4d7fff','#b44dff'][Math.floor(Math.random()*3)]});
+(function loop(){
+  bctx.clearRect(0,0,bgc.width,bgc.height);
+  pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=bgc.width;if(p.x>bgc.width)p.x=0;if(p.y<0)p.y=bgc.height;if(p.y>bgc.height)p.y=0;bctx.beginPath();bctx.arc(p.x,p.y,p.r,0,Math.PI*2);bctx.fillStyle=p.c;bctx.globalAlpha=p.a;bctx.fill();});
+  pts.forEach((a,i)=>pts.slice(i+1).forEach(b=>{const d=Math.hypot(a.x-b.x,a.y-b.y);if(d<80){bctx.beginPath();bctx.moveTo(a.x,a.y);bctx.lineTo(b.x,b.y);bctx.strokeStyle=`rgba(0,212,255,${.05*(1-d/80)})`;bctx.lineWidth=.5;bctx.globalAlpha=1;bctx.stroke();}}));
+  requestAnimationFrame(loop);
+})();
+
+// ═══════════════ INSTALLER STATE ═══════════════
+let istep=0;
+function iupdate(){
+  document.querySelectorAll('.iscreen').forEach((s,i)=>s.classList.toggle('ion',i===istep));
+  document.querySelectorAll('.istep').forEach((s,i)=>{s.classList.remove('iact','idone');if(i<istep)s.classList.add('idone');if(i===istep)s.classList.add('iact');});
+  document.getElementById('iback').disabled=istep<=0||istep>=4;
+  const labels=['Build Worlds Without Limits.','Read all terms before continuing.',calcSize()+' selected.','Make sure you have enough disk space.','Do not power off during installation.','Enjoy SETH ENGINE! 🎮'];
+  document.getElementById('iinfo').textContent=labels[istep]||'';
+  const nxt=document.getElementById('inext');
+  nxt.disabled=false;
+  if(istep===0)nxt.textContent='Get Started →';
+  else if(istep===1)nxt.textContent='Accept & Continue →';
+  else if(istep===4){nxt.disabled=true;nxt.textContent='Installing…';}
+  else if(istep===5){nxt.textContent='Launch Engine';nxt.className='ibtn ibtn-ok';nxt.onclick=()=>launchEngine();}
+  else nxt.textContent='Next →';
+}
+function igoNext(){
+  if(istep===1&&!document.getElementById('agchk').checked){
+    const r=document.getElementById('agchk').closest('.agrow');r.style.animation='shake .4s ease';setTimeout(()=>r.style.animation='',400);return;
+  }
+  if(istep===3){istep=4;iupdate();startInstall();return;}
+  if(istep<5){istep++;iupdate();}
+}
+function igoBack(){if(istep>0&&istep<4){istep--;iupdate();}}
+function toggleAgree(){const c=document.getElementById('agchk');c.checked=!c.checked;}
+iupdate();
+
+// components
+const csizes={0:1400,1:180,2:240,3:380,4:160,5:210,6:620,7:280};
+function toggleComp(el){if(el.classList.contains('creq'))return;el.classList.toggle('csel');el.querySelector('input').checked=el.classList.contains('csel');updateSpace();}
+function calcSize(){let t=0;document.querySelectorAll('#cgrid .citem').forEach((el,i)=>{if(el.classList.contains('csel'))t+=csizes[i]||0;});return(t/1024).toFixed(2)+' GB';}
+function updateSpace(){let t=0;document.querySelectorAll('#cgrid .citem').forEach((el,i)=>{if(el.classList.contains('csel'))t+=csizes[i]||0;});const gb=(t/1024).toFixed(2);document.getElementById('spfill').style.width=Math.min((t/10240)*100,95)+'%';document.getElementById('sptxt').textContent=`${gb} GB / 238 GB free`;}
+
+const dirs=['C:\\Program Files\\Seth Engine\\v2.5.1','D:\\Games\\Seth Engine','/Applications/Seth Engine.app','/opt/seth-engine/2.5.1','C:\\Users\\Dev\\Seth Engine'];
+let dIdx=0;function cycleDir(){dIdx=(dIdx+1)%dirs.length;document.getElementById('dirinput').value=dirs[dIdx];}
+
+// ═══════════════ INSTALL SIMULATION ═══════════════
+const installPlan=[
+  {lbl:'Verifying system requirements…',files:['cpu_check','gpu_compat','ram_check','disk_check'],dur:600,pct:4},
+  {lbl:'Preparing directories…',files:['mkdir Core','mkdir Assets','mkdir Scripts','mkdir Shop','mkdir Materials'],dur:400,pct:8},
+  {lbl:'Extracting Core Engine…',files:['renderer.dll','physics.bin','audio.dll','asset_pipeline.exe','scene_manager.dll','shader_compiler.exe','vulkan_backend.dll','dx12_backend.dll','opengl_backend.dll'],dur:2800,pct:25},
+  {lbl:'Extracting SETH Store & Materials…',files:['shop_client.exe','material_editor.dll','coin_wallet.json','shader_library.bin','texture_atlas.bin','default_materials.pack'],dur:1400,pct:36},
+  {lbl:'Extracting Visual Script Editor…',files:['blueprint_editor.exe','node_graph.dll','compiler.dll','debugger.exe'],dur:1200,pct:46},
+  {lbl:'Extracting AI Assistant…',files:['seth_ai.bin','model_weights.gguf','tokenizer.json','inference.dll'],dur:2200,pct:58},
+  {lbl:'Extracting Multiplayer SDK…',files:['netcode.dll','lobby.dll','matchmaking.exe','voice_chat.bin','anticheat.dll'],dur:1000,pct:66},
+  {lbl:'Extracting VR & AR Toolkit…',files:['vr_runtime.dll','oculus_sdk.bin','steamvr_plugin.dll','webxr.js'],dur:1200,pct:74},
+  {lbl:'Extracting Mobile & Web Export…',files:['android_compiler.exe','ios_toolchain.bin','webgl_exporter.js'],dur:900,pct:81},
+  {lbl:'Building shader library…',files:['pbr.vert','pbr.frag','skybox.comp','bloom.comp','ssr.comp','gi.comp','toon.frag','wireframe.vert'],dur:800,pct:87},
+  {lbl:'Setting up SETH Store wallet (500 SC gift)…',files:['wallet_init.json','welcome_bonus.coins','free_assets.pack'],dur:500,pct:91},
+  {lbl:'Installing runtime dependencies…',files:['vc_redist.exe','dotnet7.msi','openssl.dll','curl.dll'],dur:600,pct:94},
+  {lbl:'Registering file associations…',files:['.seth → Seth Engine','MIME types','Shell extensions'],dur:300,pct:96},
+  {lbl:'Verifying installation integrity…',files:['SHA-256 checksum pass','3,142 files verified ✓'],dur:700,pct:99},
+  {lbl:'Finalizing…',files:['cleanup_temp','write_registry','manifest.json'],dur:400,pct:100},
+];
+function logAdd(type,msg){const log=document.getElementById('ilog');const d=new Date();const t=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;const px={ok:'[ OK ]',inf:'[INFO]',wrn:'[WARN]',dim:'[....]'}[type];const cls={ok:'lok',inf:'linf',wrn:'lwrn',dim:'ldim'}[type]||'lmsg';const l=document.createElement('div');l.className='logline';l.innerHTML=`<span class="lt">${t}</span><span class="${cls}">${px}</span><span class="lmsg">${msg}</span>`;log.appendChild(l);log.scrollTop=log.scrollHeight;}
+function sl(ms){return new Promise(r=>setTimeout(r,ms));}
+async function startInstall(){
+  logAdd('inf','SETH ENGINE Installer v2.5.1 started');
+  logAdd('inf','Target: '+document.getElementById('dirinput').value);
+  await sl(300);
+  let total=0,done=0;installPlan.forEach(s=>total+=s.files.length);
+  let gpct=0;
+  for(let si=0;si<installPlan.length;si++){
+    const s=installPlan[si];document.getElementById('plabel').textContent=s.lbl;logAdd('inf',s.lbl);
+    const fDur=Math.floor(s.dur/s.files.length);
+    for(let fi=0;fi<s.files.length;fi++){
+      const f=s.files[fi];document.getElementById('cfile').textContent='  → '+f;
+      document.getElementById('sfill').style.width=((fi+1)/s.files.length*100)+'%';
+      logAdd(f.includes('✓')||f.includes('pass')?'ok':'dim',f);
+      const frac=(fi+1)/s.files.length;const np=gpct+(s.pct-gpct)*frac;
+      document.getElementById('pfill').style.width=np+'%';document.getElementById('ppct').textContent=np.toFixed(0)+'%';
+      done++;document.getElementById('fct').textContent=`${done}/${total}`;
+      const mb=Math.round(np/100*2650);document.getElementById('wrt').textContent=mb+' MB';
+      const spd=(Math.random()*160+80).toFixed(0);document.getElementById('spd').textContent=spd+' MB/s';
+      const rem=Math.round((100-np)/100*2650/((+spd/1000)||1));document.getElementById('rem').textContent=rem>0?(rem+'s'):'Almost!';
+      await sl(fDur);
+    }
+    logAdd('ok',s.lbl.replace('…',''));gpct=s.pct;
+  }
+  document.getElementById('pfill').style.background='linear-gradient(90deg,#1aaa2e,#28c840)';
+  document.getElementById('pfill').style.boxShadow='0 0 16px rgba(40,200,64,.6)';
+  document.getElementById('cfile').textContent='';
+  logAdd('ok','═══════════════════════════════════════');
+  logAdd('ok','SETH ENGINE v2.5.1 installed SUCCESSFULLY');
+  logAdd('ok','SETH Store loaded with 500 SethCoins gift');
+  logAdd('ok','═══════════════════════════════════════');
+  await sl(600);
+  istep=5;iupdate();document.getElementById('finaldir').textContent=document.getElementById('dirinput').value;
+  launchConfetti();
+}
+function launchConfetti(){
+  const w=document.getElementById('cnfw');w.innerHTML='';
+  const cols=['#00d4ff','#4d7fff','#b44dff','#ff4daf','#28c840','#febc2e'];
+  for(let i=0;i<70;i++){const el=document.createElement('div');el.className='cp';el.style.cssText=`left:${Math.random()*100}%;background:${cols[Math.floor(Math.random()*cols.length)]};animation-duration:${Math.random()*2+1.5}s;animation-delay:${Math.random()*.6}s;width:${Math.random()*7+3}px;height:${Math.random()*7+3}px;border-radius:${Math.random()>.5?'50%':'2px'}`;w.appendChild(el);}
+}
+
+// ═══════════════ ENGINE STATE ═══════════════
+let coins=500;
+let ownedItems=new Set();
+let cart=[];
+let selectedObj=null;
+let currentMat={color:'#4d7fff',metallic:.2,roughness:.6,emissive:'#000000',emissiveStrength:0,opacity:1,name:'Default Blue'};
+let appliedMaterials={};
+let currentShading='Material';
+let vpAngle=0;
+let vpZoomLevel=1;
+
+const SCENE_OBJECTS=[
+  {id:'root',name:'Scene Root',icon:'🌍',color:'#00d4ff',visible:true,pos:{x:0,y:0,z:0},rot:{x:0,y:0,z:0},scl:{x:1,y:1,z:1},type:'Root'},
+  {id:'sun',name:'Directional Light',icon:'☀',color:'#febc2e',visible:true,pos:{x:10,y:20,z:5},rot:{x:45,y:30,z:0},scl:{x:1,y:1,z:1},type:'Light'},
+  {id:'cam',name:'Main Camera',icon:'📷',color:'#b44dff',visible:true,pos:{x:0,y:3,z:10},rot:{x:-15,y:0,z:0},scl:{x:1,y:1,z:1},type:'Camera'},
+  {id:'terrain',name:'Terrain',icon:'🏔',color:'#28c840',visible:true,pos:{x:0,y:-2,z:0},rot:{x:0,y:0,z:0},scl:{x:10,y:1,z:10},type:'Mesh'},
+  {id:'player',name:'Player Character',icon:'🦸',color:'#b44dff',visible:true,pos:{x:0,y:0,z:0},rot:{x:0,y:0,z:0},scl:{x:1,y:1,z:1},type:'Character'},
+  {id:'cube1',name:'Prop — Crate',icon:'📦',color:'#4d7fff',visible:true,pos:{x:3,y:0,z:2},rot:{x:0,y:30,z:0},scl:{x:1,y:1,z:1},type:'Mesh'},
+  {id:'cube2',name:'Prop — Rock',icon:'🪨',color:'#7a8fb5',visible:true,pos:{x:-3,y:-.5,z:1},rot:{x:0,y:60,z:15},scl:{x:1.5,y:.8,z:1.2},type:'Mesh'},
+  {id:'fx',name:'VFX System',icon:'✨',color:'#ff4daf',visible:true,pos:{x:0,y:2,z:0},rot:{x:0,y:0,z:0},scl:{x:1,y:1,z:1},type:'VFX'},
+  {id:'audio',name:'Audio Manager',icon:'🔊',color:'#00d4ff',visible:true,pos:{x:0,y:0,z:0},rot:{x:0,y:0,z:0},scl:{x:1,y:1,z:1},type:'Audio'},
+];
+
+// ═══════════════ SHOP DATA ═══════════════
+const SHOP_ITEMS=[
+  // MAPS
+  {id:'m1',cat:'maps',name:'Arctic Tundra World',icon:'❄',bg:'linear-gradient(135deg,#0a2a4a,#1a4a7a)',price:0,rating:5,tags:['free','new'],features:['32km² terrain','Procedural snow','Ice caves','Frozen lake'],desc:'A massive arctic biome with procedural snowfall, ice caves, and a fully navigable frozen lake. Perfect for survival or adventure games.'},
+  {id:'m2',cat:'maps',name:'Desert Canyon Map',icon:'🏜',bg:'linear-gradient(135deg,#4a2a0a,#8a5a1a)',price:80,rating:5,tags:['sale'],features:['20km² terrain','Dynamic sandstorms','Ancient ruins','Day/night cycle'],desc:'Vast desert canyon system with ancient ruins, sandstorm events, and a full day/night cycle with stunning sunsets.'},
+  {id:'m3',cat:'maps',name:'Cyberpunk City Block',icon:'🏙',bg:'linear-gradient(135deg,#0a0a2a,#1a0a3a)',price:120,rating:5,tags:['new'],features:['Full city block','Neon lighting','Underground tunnels','Rooftop access'],desc:'A detailed futuristic city block with neon signs, underground maintenance tunnels, and rooftop environments. 3,000+ unique props.'},
+  {id:'m4',cat:'maps',name:'Tropical Island',icon:'🏝',bg:'linear-gradient(135deg,#0a3a1a,#1a5a3a)',price:0,rating:4,tags:['free'],features:['Ocean swimming','Beach terrain','Jungle interior','Shipwreck'],desc:'Beautiful tropical island complete with swimming ocean, dense jungle, a hidden shipwreck, and dynamic weather.'},
+  {id:'m5',cat:'maps',name:'Underground Dungeon',icon:'🗝',bg:'linear-gradient(135deg,#1a0a0a,#3a1a1a)',price:60,rating:5,tags:[],features:['40 rooms','Traps included','Boss arena','Loot system'],desc:'Modular dungeon with 40 hand-crafted rooms, trap systems, treasure rooms, and a final boss arena.'},
+  {id:'m6',cat:'maps',name:'Space Station Alpha',icon:'🛸',bg:'linear-gradient(135deg,#050510,#0a0a2a)',price:90,rating:5,tags:['new'],features:['Zero-G areas','Airlocks','Control room','Escape pods'],desc:'Fully interior space station with functional airlocks, zero-gravity zones, and multiple escape routes. Inspired by sci-fi classics.'},
+  {id:'m7',cat:'maps',name:'Medieval Castle',icon:'🏰',bg:'linear-gradient(135deg,#1a1a0a,#2a2a1a)',price:70,rating:4,tags:[],features:['Full exterior','Interior rooms','Dungeon below','Secret passages'],desc:'A complete medieval castle with gatehouse, great hall, towers, dungeon, and 5 hidden secret passages.'},
+  {id:'m8',cat:'maps',name:'Volcano Island',icon:'🌋',bg:'linear-gradient(135deg,#3a0a0a,#6a1a0a)',price:50,rating:5,tags:['sale'],features:['Active volcano','Lava rivers','Cave systems','Shrine puzzle'],desc:'Dramatic volcanic island with flowing lava rivers, cave networks, and an ancient shrine with a puzzle mechanic.'},
+  {id:'m9',cat:'maps',name:'Haunted Mansion',icon:'👻',bg:'linear-gradient(135deg,#0a0a0a,#1a1a2a)',price:0,rating:5,tags:['free'],features:['3 floors','Basement','Attic','Ghost triggers'],desc:'Spooky Victorian mansion with 3 floors, creaky basement, dusty attic, and built-in ghost trigger events.'},
+  {id:'m10',cat:'maps',name:'Floating Sky Islands',icon:'🌤',bg:'linear-gradient(135deg,#0a1a3a,#1a2a5a)',price:100,rating:5,tags:['new'],features:['20 islands','Rope bridges','Wind mechanics','Sky temple'],desc:'A chain of floating sky islands connected by rope bridges, with wind-based movement challenges and a central sky temple.'},
+  {id:'m11',cat:'maps',name:'Post-Apocalyptic City',icon:'💀',bg:'linear-gradient(135deg,#1a1a0a,#3a2a0a)',price:0,rating:4,tags:['free'],features:['Ruined city','Vehicle wrecks','Safe houses','Scavenge zones'],desc:'Destroyed cityscape with collapsed buildings, abandoned vehicles, and lootable safe houses for survival games.'},
+  {id:'m12',cat:'maps',name:'Underwater Temple',icon:'🐠',bg:'linear-gradient(135deg,#000a1a,#001a3a)',price:80,rating:5,tags:[],features:['Full underwater','Coral reef','Ancient ruins','Boss chamber'],desc:'Fully navigable underwater environment with coral reefs, ancient sunken temples, and a hidden boss chamber.'},
+  {id:'m13',cat:'maps',name:'Racing Circuit Pro',icon:'🏎',bg:'linear-gradient(135deg,#0a0a0a,#1a0a3a)',price:40,rating:4,tags:[],features:['3 track variants','Pit lane','Grandstand','Night variant'],desc:'Professional racing circuit with 3 layout variants, working pit lane, grandstand props, and a night racing version.'},
+  {id:'m14',cat:'maps',name:'Ancient Forest Realm',icon:'🌲',bg:'linear-gradient(135deg,#051a05,#0a2a0a)',price:0,rating:5,tags:['free','new'],features:['Dense forest','Fairy glades','Crystal caves','Elder tree'],desc:'Magical ancient forest with fairy glades, glowing crystal caves, and the massive Elder Tree boss encounter area.'},
+  {id:'m15',cat:'maps',name:'Wild West Town',icon:'🤠',bg:'linear-gradient(135deg,#2a1a0a,#4a2a0a)',price:55,rating:4,tags:['sale'],features:['Main street','Saloon','Bank','Desert outskirts'],desc:'Complete Wild West frontier town with a working saloon, bank vault for heist mechanics, and surrounding desert.'},
+  {id:'m16',cat:'maps',name:'Futuristic Lab',icon:'🔬',bg:'linear-gradient(135deg,#001a1a,#002a2a)',price:65,rating:5,tags:[],features:['Multi-level lab','Test chambers','Server room','Emergency exits'],desc:'Multi-level research laboratory with test chambers, server room, containment areas, and emergency escape sequences.'},
+  // MATERIALS
+  {id:'mat1',cat:'materials',name:'Holographic Metal',icon:'💠',bg:'linear-gradient(135deg,#001a2a,#002a3a)',price:0,rating:5,tags:['free'],features:['PBR shader','Animated shimmer','Color tint','Normal map'],desc:'Futuristic holographic metallic material with animated color shimmer. Perfect for sci-fi objects and UI elements.',matColor:'#00d4ff',metallic:.9,roughness:.1},
+  {id:'mat2',cat:'materials',name:'Lava Rock',icon:'🌋',bg:'linear-gradient(135deg,#1a0000,#3a0a00)',price:30,rating:5,tags:[],features:['Emissive glow','Crack pattern','Animated lava','LOD included'],desc:'Hot lava rock material with glowing emissive cracks that pulse. Animated lava flow in the seams.',matColor:'#ff4400',metallic:.0,roughness:.9},
+  {id:'mat3',cat:'materials',name:'Worn Leather',icon:'🟫',bg:'linear-gradient(135deg,#2a1a0a,#3a2a0a)',price:0,rating:4,tags:['free'],features:['4K textures','Aged look','Stitching normal','Roughness map'],desc:'Realistic aged leather with stitching detail, wear patterns, and 4K PBR textures.',matColor:'#6b3f1f',metallic:.0,roughness:.85},
+  {id:'mat4',cat:'materials',name:'Neon Grid',icon:'🔷',bg:'linear-gradient(135deg,#000a1a,#001a2a)',price:20,rating:5,tags:['new'],features:['Emissive lines','Animated pulse','Color control','Tiling'],desc:'Cyberpunk-style neon grid material with animated pulsing lines. Customizable color and animation speed.',matColor:'#4d7fff',metallic:.3,roughness:.2},
+  {id:'mat5',cat:'materials',name:'Rusty Iron',icon:'🔩',bg:'linear-gradient(135deg,#1a0a0a,#2a1a0a)',price:0,rating:5,tags:['free'],features:['Rust patches','Chipped paint','Scratches','PBR accurate'],desc:'Heavily rusted iron with peeling paint, deep scratches, and physically accurate PBR properties.',matColor:'#7a3a1a',metallic:.6,roughness:.8},
+  {id:'mat6',cat:'materials',name:'Crystal Glass',icon:'💎',bg:'linear-gradient(135deg,#0a1a1a,#0a2a2a)',price:40,rating:5,tags:[],features:['Transparency','Refraction','Caustics','Scratches'],desc:'Highly detailed crystal glass with realistic refraction, caustic light patterns, and surface scratches.',matColor:'#aaddff',metallic:.0,roughness:.05},
+  {id:'mat7',cat:'materials',name:'Alien Organic',icon:'👾',bg:'linear-gradient(135deg,#001a00,#002a0a)',price:35,rating:4,tags:['new'],features:['Pulsing veins','Translucency','Slime effect','SSS shader'],desc:'Strange alien organic material with pulsing vein network, subsurface scattering, and animated slime drips.',matColor:'#00ff66',metallic:.0,roughness:.4},
+  {id:'mat8',cat:'materials',name:'Gold Ornate',icon:'🏆',bg:'linear-gradient(135deg,#1a1000,#3a2000)',price:25,rating:5,tags:[],features:['22K gold look','Engravings','High specular','Tarnish variant'],desc:'Luxurious ornate gold material with engraving details, high specular highlights, and an optional tarnished variant.',matColor:'#ffd700',metallic:.95,roughness:.15},
+  {id:'mat9',cat:'materials',name:'Plasma Energy',icon:'⚡',bg:'linear-gradient(135deg,#1a001a,#2a002a)',price:45,rating:5,tags:['new','sale'],features:['Animated flow','Color ramp','Emissive','Dissolve mask'],desc:'Dynamic plasma energy material with animated flow, customizable color ramp, and a dissolve mask for dramatic entry/exit effects.',matColor:'#b44dff',metallic:.0,roughness:.0},
+  {id:'mat10',cat:'materials',name:'Snow & Ice Pack',icon:'❄',bg:'linear-gradient(135deg,#0a1a2a,#1a2a3a)',price:0,rating:4,tags:['free'],features:['Snow layer','Ice cracks','Water drips','Wetness'],desc:'3-in-1 material pack for snow, ice, and wet surfaces. Includes procedural snow depth control and animated water drips.',matColor:'#ddeeff',metallic:.1,roughness:.3},
+  {id:'mat11',cat:'materials',name:'Stained Glass',icon:'🌈',bg:'linear-gradient(135deg,#0a0a1a,#1a0a1a)',price:30,rating:5,tags:[],features:['8 color panels','Lead lines','Light pass','Animated dust'],desc:'Gothic stained glass material with 8 customizable color panels, lead framing lines, and dust mote particles in the light shaft.',matColor:'#ff44aa',metallic:.0,roughness:.08},
+  {id:'mat12',cat:'materials',name:'Carbon Fiber',icon:'⬛',bg:'linear-gradient(135deg,#050505,#0a0a0a)',price:15,rating:4,tags:[],features:['Weave pattern','High specular','Matte variant','Aniso'],desc:'Realistic carbon fiber weave with anisotropic highlights and both gloss and matte variants.',matColor:'#111111',metallic:.4,roughness:.25},
+  {id:'mat13',cat:'materials',name:'Magic Runes',icon:'🔮',bg:'linear-gradient(135deg,#0a001a,#15003a)',price:50,rating:5,tags:['new'],features:['Animated glyphs','Glow control','12 rune sets','Color change'],desc:'Animated magical rune material with 12 rune symbol sets, controllable glow intensity, and smooth color cycling.',matColor:'#7700ff',metallic:.0,roughness:.5},
+  {id:'mat14',cat:'materials',name:'Brick & Mortar',icon:'🧱',bg:'linear-gradient(135deg,#1a0a0a,#2a1010)',price:0,rating:4,tags:['free'],features:['4K bricks','Aged mortar','Moss variant','Wet variant'],desc:'Detailed brick and mortar material with aged cracks, optional moss growth, and a rain-wet variant.',matColor:'#8b4513',metallic:.0,roughness:.9},
+  {id:'mat15',cat:'materials',name:'Hologram Shader',icon:'🔵',bg:'linear-gradient(135deg,#001a1a,#003a3a)',price:60,rating:5,tags:['sale'],features:['Scan lines','Flicker anim','Alpha edge','Distortion'],desc:'Classic hologram effect with animated scan lines, edge glow, random flicker, and distortion noise.',matColor:'#00ffcc',metallic:.0,roughness:.0},
+  {id:'mat16',cat:'materials',name:'Muddy Ground',icon:'💧',bg:'linear-gradient(135deg,#0a0800,#1a1200)',price:0,rating:3,tags:['free'],features:['Mud splatter','Foot tracks','Puddles','Dynamic wetness'],desc:'Realistic muddy ground with wet puddles, adjustable mud depth, and procedural footprint tracking support.',matColor:'#4a3a2a',metallic:.0,roughness:.95},
+  {id:'mat17',cat:'materials',name:'Obsidian Dark',icon:'⬛',bg:'linear-gradient(135deg,#020202,#050505)',price:35,rating:5,tags:[],features:['Deep black','Volcanic veins','Edge glow','Fracture map'],desc:'Volcanic obsidian with deep black base, glowing orange fracture veins, and an edge highlight shader.',matColor:'#111122',metallic:.7,roughness:.2},
+  {id:'mat18',cat:'materials',name:'Animated Water',icon:'🌊',bg:'linear-gradient(135deg,#001520,#002030)',price:55,rating:5,tags:['new'],features:['Wave sim','Foam edge','Depth fade','Caustics'],desc:'Real-time animated water surface with wave simulation, shore foam, depth-based color fade, and caustic projections.',matColor:'#0066aa',metallic:.05,roughness:.05},
+  // TOOLS
+  {id:'t1',cat:'tools',name:'Terrain Sculptor Pro',icon:'🏔',bg:'linear-gradient(135deg,#051a05,#0a2a0a)',price:0,rating:5,tags:['free'],features:['GPU sculpting','Auto-texture','Erosion sim','Biome paint'],desc:'Professional terrain sculpting toolkit with GPU-accelerated brushes, automatic texture blending, erosion simulation, and biome painting.'},
+  {id:'t2',cat:'tools',name:'AI Level Generator',icon:'🤖',bg:'linear-gradient(135deg,#00050a,#000a15)',price:90,rating:5,tags:['new'],features:['Text-to-level','Style matching','Iterative refine','Export'],desc:'Describe a level in plain English and watch SETH AI generate a complete, playable level with props, enemies, and objectives.'},
+  {id:'t3',cat:'tools',name:'Procedural City Builder',icon:'🏙',bg:'linear-gradient(135deg,#05050a,#0a0a15)',price:70,rating:5,tags:[],features:['Block generator','Road network','LOD auto','Population'],desc:'Generate entire cities procedurally with configurable block layouts, road networks, automatic LOD generation, and crowd population.'},
+  {id:'t4',cat:'tools',name:'Dialogue Tree Editor',icon:'💬',bg:'linear-gradient(135deg,#0a0a05,#15150a)',price:0,rating:4,tags:['free'],features:['Visual tree','Voice sync','Localization','Conditions'],desc:'Visual dialogue tree editor with voice-over synchronization, multi-language support, and condition-based branching.'},
+  {id:'t5',cat:'tools',name:'Inventory System Plus',icon:'🎒',bg:'linear-gradient(135deg,#0a050a,#150a15)',price:40,rating:5,tags:[],features:['Grid-based','Drag & drop','Item crafting','Rarity tiers'],desc:'Complete inventory system with grid-based slots, drag-and-drop, 5 rarity tiers, and a visual crafting recipe editor.'},
+  {id:'t6',cat:'tools',name:'Quest Builder',icon:'📜',bg:'linear-gradient(135deg,#100a05,#1a1205)',price:30,rating:4,tags:['sale'],features:['Quest chains','Objectives','Rewards','Journal UI'],desc:'Full quest system with multi-part quest chains, tracked objectives, reward distribution, and a built-in journal UI widget.'},
+  {id:'t7',cat:'tools',name:'Spline Road Tool',icon:'🛣',bg:'linear-gradient(135deg,#0a0a0a,#151515)',price:0,rating:5,tags:['free'],features:['Bezier splines','Auto mesh','Traffic lanes','Intersections'],desc:'Draw roads and paths with bezier splines. Auto-generates geometry, texture tiling, traffic lane markings, and intersection meshes.'},
+  {id:'t8',cat:'tools',name:'Weather System',icon:'⛈',bg:'linear-gradient(135deg,#050a15,#0a1525)',price:50,rating:5,tags:['new'],features:['Rain/snow/fog','Thunder','Wind physics','Time of day'],desc:'Complete dynamic weather system with rain, snow, fog, lightning, wind physics affecting vegetation, and full time-of-day control.'},
+  {id:'t9',cat:'tools',name:'Foliage Painter',icon:'🌿',bg:'linear-gradient(135deg,#031003,#051505)',price:25,rating:4,tags:[],features:['GPU instancing','Wind sway','LOD','Collision'],desc:'Paint dense foliage with GPU instancing for millions of grass blades and plants, wind animation, LOD, and optional collision.'},
+  {id:'t10',cat:'tools',name:'Animation Retargeter',icon:'🎬',bg:'linear-gradient(135deg,#0a051a,#15082a)',price:45,rating:5,tags:[],features:['Any rig','Motion cap','Batch process','Preview'],desc:'Retarget any motion capture animation to any character rig automatically. Batch process entire animation libraries.'},
+  {id:'t11',cat:'tools',name:'Minimap Generator',icon:'🗺',bg:'linear-gradient(135deg,#031a03,#052a05)',price:0,rating:4,tags:['free'],features:['Auto-generate','Custom icons','Fog of war','Zoom levels'],desc:'Automatically generate a minimap from any scene. Add custom icons, fog of war, player tracking, and multiple zoom levels.'},
+  {id:'t12',cat:'tools',name:'Save System Pro',icon:'💾',bg:'linear-gradient(135deg,#05050a,#0a0a15)',price:35,rating:5,tags:[],features:['Slot-based','Cloud sync','Encryption','Auto-save'],desc:'Complete save/load system with multiple save slots, cloud synchronization, data encryption, and configurable auto-save intervals.'},
+  // CHARACTERS
+  {id:'c1',cat:'characters',name:'Sci-Fi Soldier Pack',icon:'🦾',bg:'linear-gradient(135deg,#051015,#0a2020)',price:0,rating:5,tags:['free'],features:['4 variants','80 anims','Weapon sockets','Face blend'],desc:'4 fully rigged sci-fi soldier variants with 80 motion-captured animations, weapon attachment sockets, and facial blend shapes.'},
+  {id:'c2',cat:'characters',name:'Fantasy Heroes Bundle',icon:'⚔',bg:'linear-gradient(135deg,#150a00,#250f00)',price:80,rating:5,tags:[],features:['Knight, Mage, Rogue','120+ anims','Customizable','Voiced'],desc:'Three classic fantasy hero archetypes — Knight, Mage, and Rogue — with 120+ animations each and full voice pack.'},
+  {id:'c3',cat:'characters',name:'Zombie Horde Pack',icon:'🧟',bg:'linear-gradient(135deg,#0a0500,#150a00)',price:50,rating:4,tags:['sale'],features:['8 zombie types','AI behaviors','Ragdoll','Pooling'],desc:'8 unique zombie variants with built-in AI behavior states, full ragdoll physics, and optimized object pooling for large hordes.'},
+  {id:'c4',cat:'characters',name:'Animal Pack Deluxe',icon:'🦁',bg:'linear-gradient(135deg,#1a0a00,#2a1500)',price:0,rating:5,tags:['free'],features:['12 animals','Flocking AI','Sounds','LOD'],desc:'12 fully animated animals — wolf, bear, deer, eagle, and more — with flocking/herding AI, ambient sounds, and LOD.'},
+  {id:'c5',cat:'characters',name:'NPC Crowd System',icon:'🧑‍🤝‍🧑',bg:'linear-gradient(135deg,#050510,#0a0a20)',price:60,rating:5,tags:['new'],features:['100+ faces','Dynamic dialog','Schedules','Emotions'],desc:'Procedural crowd system with 100+ unique face variations, dynamic context-sensitive dialogue, daily schedules, and emotion states.'},
+  {id:'c6',cat:'characters',name:'Mech Pilot Bundle',icon:'🤖',bg:'linear-gradient(135deg,#030a15,#051525)',price:70,rating:5,tags:[],features:['3 mech suits','Cockpit view','Destruction','Upgrades'],desc:'3 fully destructible mech suit designs with working cockpit camera, progressive damage states, and modular upgrade attachments.'},
+  {id:'c7',cat:'characters',name:'Monster Pack Vol.1',icon:'👹',bg:'linear-gradient(135deg,#150005,#25000a)',price:0,rating:4,tags:['free'],features:['6 monsters','Boss variants','Abilities','Drops'],desc:'6 creature types including a fire drake, shadow wraith, and stone golem, each with unique attack abilities and loot drop tables.'},
+  {id:'c8',cat:'characters',name:'Cyberpunk Gang Pack',icon:'😈',bg:'linear-gradient(135deg,#050010,#0a0020)',price:45,rating:4,tags:[],features:['4 gangs','Unique gear','Graffiti tags','Territory'],desc:'Four distinct cyberpunk gang factions with unique clothing, weapons, territory behavior AI, and gang-specific graffiti decals.'},
+  {id:'c9',cat:'characters',name:'Space Crew Pack',icon:'👨‍🚀',bg:'linear-gradient(135deg,#050508,#0a0a12)',price:0,rating:5,tags:['free','new'],features:['5 crew roles','EVA suits','Zero-G anims','Helmets'],desc:'5 space crew members with EVA suit variants, zero-gravity movement animations, and modular helmet/visor customization.'},
+  {id:'c10',cat:'characters',name:'Wildlife & Pets',icon:'🐾',bg:'linear-gradient(135deg,#0a0500,#150a00)',price:30,rating:4,tags:['sale'],features:['Dogs, cats, birds','Pet AI','Petting anim','Sounds'],desc:'Domestic and wild animals with companion AI, interactive petting animations, and full ambient sound libraries.'},
+  // VFX
+  {id:'vfx1',cat:'vfx',name:'Explosion Mega Pack',icon:'💥',bg:'linear-gradient(135deg,#1a0500,#2a0a00)',price:0,rating:5,tags:['free'],features:['60 explosions','Shockwave','Debris','Smoke trails'],desc:'60 high-quality explosion effects including nuclear blasts, small grenades, vehicle explosions, and underwater detonations.'},
+  {id:'vfx2',cat:'vfx',name:'Magic Spells Pack',icon:'✨',bg:'linear-gradient(135deg,#0a0015,#15002a)',price:55,rating:5,tags:[],features:['50 spells','Elements','Impact FX','Trails'],desc:'50 magic spell effects covering fire, ice, lightning, arcane, and nature elements with full casting, projectile, and impact FX.'},
+  {id:'vfx3',cat:'vfx',name:'Sci-Fi FX Bundle',icon:'⚡',bg:'linear-gradient(135deg,#000a1a,#00152a)',price:40,rating:4,tags:['sale'],features:['Laser beams','Shields','Teleport','Engine glow'],desc:'Comprehensive sci-fi visual effects: laser beams, energy shields, teleportation portals, and starship engine glow effects.'},
+  {id:'vfx4',cat:'vfx',name:'Weather FX Pack',icon:'⛈',bg:'linear-gradient(135deg,#050510,#0a0a20)',price:0,rating:4,tags:['free'],features:['Rain splash','Lightning','Snow drift','Dust devils'],desc:'Weather particle effects including rain splashes, lightning arcs, blowing snow, and desert dust devil twisters.'},
+  {id:'vfx5',cat:'vfx',name:'Portal & Teleport FX',icon:'🌀',bg:'linear-gradient(135deg,#050015,#0a002a)',price:30,rating:5,tags:['new'],features:['5 portal styles','Entry/exit FX','Distortion','Loop'],desc:'Five unique portal designs with matching entry/exit effects, screen-space distortion, and seamlessly looping idle animations.'},
+  {id:'vfx6',cat:'vfx',name:'Blood & Impact FX',icon:'💢',bg:'linear-gradient(135deg,#0f0000,#1a0000)',price:25,rating:4,tags:[],features:['Hit sparks','Decals','Squirt sim','Gore toggle'],desc:'Combat impact effects with hit sparks, blood decals, physics-simulated splatter, and a content-toggle for all-ages mode.'},
+  {id:'vfx7',cat:'vfx',name:'Nature Ambience',icon:'🌿',bg:'linear-gradient(135deg,#031003,#051505)',price:0,rating:4,tags:['free'],features:['Fireflies','Leaves','Pollen','Mist'],desc:'Ambient nature particles including firefly swarms, falling leaves, drifting pollen, and ground-level morning mist.'},
+  {id:'vfx8',cat:'vfx',name:'Cinematic FX Pack',icon:'🎬',bg:'linear-gradient(135deg,#050500,#0a0a00)',price:60,rating:5,tags:['new'],features:['Lens flares','DOF','Chromatic','Film grain'],desc:'Cinematic post-processing effects: anamorphic lens flares, depth of field bokeh, chromatic aberration, and realistic film grain.'},
+  // AUDIO
+  {id:'a1',cat:'audio',name:'Epic Orchestral Pack',icon:'🎻',bg:'linear-gradient(135deg,#0a0500,#150a00)',price:0,rating:5,tags:['free'],features:['40 tracks','Loops','Stingers','3D audio'],desc:'40 professionally composed orchestral tracks for adventure, combat, exploration, and victory. Full loop and stinger versions included.'},
+  {id:'a2',cat:'audio',name:'Sci-Fi Sound FX',icon:'🔊',bg:'linear-gradient(135deg,#000510,#000a1a)',price:35,rating:5,tags:[],features:['500 sounds','Lasers','Interfaces','Engines'],desc:'500 high-quality sci-fi sound effects covering weapons, UI bleeps, engine hums, environmental ambience, and alien communication.'},
+  {id:'a3',cat:'audio',name:'Fantasy Ambience',icon:'🎵',bg:'linear-gradient(135deg,#0a0500,#100a00)',price:0,rating:4,tags:['free'],features:['Forest, cave, city','Wind','Crowd','Day/night'],desc:'Atmospheric ambience loops for forests, dungeons, towns, and ruins. Smooth day-to-night transitions included.'},
+  {id:'a4',cat:'audio',name:'Electronic Soundtrack',icon:'🎧',bg:'linear-gradient(135deg,#05001a,#0a0030)',price:45,rating:5,tags:['new'],features:['20 tracks','Adaptive layers','BPM sync','Stems'],desc:'20 electronic/cyberpunk soundtrack tracks with adaptive music layers that react to gameplay intensity. Stem files included.'},
+  {id:'a5',cat:'audio',name:'Voice Actor Bundle',icon:'🎙',bg:'linear-gradient(135deg,#0a050a,#150a15)',price:80,rating:4,tags:[],features:['4 voices','1000+ lines','6 emotions','Custom requests'],desc:'4 professional voice actors with 1,000+ recorded lines, 6 emotional tones each, and a custom line recording request system.'},
+  {id:'a6',cat:'audio',name:'Horror Sound Pack',icon:'😱',bg:'linear-gradient(135deg,#0a0000,#150000)',price:0,rating:5,tags:['free','new'],features:['Jumpscare stings','Ambience','Monster sounds','Silence breaks'],desc:'Spine-chilling horror audio: jump scare stings, creeping ambience, monster growls, and unsettling silence-break moments.'},
+  // TEMPLATES
+  {id:'tp1',cat:'templates',name:'FPS Starter Kit',icon:'🎯',bg:'linear-gradient(135deg,#050a05,#0a1505)',price:0,rating:5,tags:['free','new'],features:['Full FPS controller','Weapons system','Health/ammo UI','AI enemies'],desc:'A complete first-person shooter starter project with weapons, health/ammo HUD, enemy AI, and a test arena. Ready to customize.'},
+  {id:'tp2',cat:'templates',name:'RPG Open World Kit',icon:'🗡',bg:'linear-gradient(135deg,#150a00,#250f00)',price:120,rating:5,tags:[],features:['Open world','Quests','Inventory','Combat'],desc:'Full RPG framework with open-world exploration, quest system, inventory management, and turn-based combat system. Just add content!'},
+];
+
+let shopCatFilter='all';
+let shopTagFilter=new Set(['free']);
+let shopSearch='';
+let selectedItem=null;
+
+// ═══════════════ LAUNCH ENGINE ═══════════════
+function launchEngine(){
+  document.getElementById('installer').style.opacity='0';
+  document.getElementById('installer').style.transform='scale(.96)';
+  document.getElementById('installer').style.transition='.5s';
+  setTimeout(()=>{
+    document.getElementById('installer').style.display='none';
+    document.getElementById('engine').classList.add('show');
+    initEngine();
+    showToast('🎮 Welcome to SETH ENGINE! You have 500 SethCoins','ok');
+    setTimeout(()=>openShop(),1500);
+  },500);
+}
+
+// ═══════════════ ENGINE INIT ═══════════════
+function initEngine(){
+  buildHierarchy();
+  initViewport();
+  populateAssetBrowser();
+  setInterval(animateFPS,1200);
+}
+
+function buildHierarchy(){
+  const list=document.getElementById('hierList');list.innerHTML='';
+  SCENE_OBJECTS.forEach(obj=>{
+    const item=document.createElement('div');item.className='hier-item';
+    item.innerHTML=`<div class="hier-ico" style="background:${obj.color}22;color:${obj.color}">${obj.icon}</div><span>${obj.name}</span><span class="hier-vis" title="Toggle visibility" onclick="event.stopPropagation();toggleVis('${obj.id}',this)">👁</span>`;
+    item.onclick=()=>selectObj(obj);
+    if(selectedObj&&selectedObj.id===obj.id)item.classList.add('hsel');
+    list.appendChild(item);
+  });
+}
+
+function selectObj(obj){
+  selectedObj=obj;
+  buildHierarchy();
+  document.getElementById('selInfo').style.display='block';
+  document.getElementById('selInfo').textContent=obj.icon+' '+obj.name;
+  showProps(obj);
+}
+
+function toggleVis(id,el){const obj=SCENE_OBJECTS.find(o=>o.id===id);if(obj){obj.visible=!obj.visible;el.style.opacity=obj.visible?'1':'.2';}}
+
+function showProps(obj){
+  const ps=document.getElementById('propsScroll');
+  const mat=appliedMaterials[obj.id]||currentMat;
+  ps.innerHTML=`
+    <div class="prop-section">
+      <div class="prop-sh">Transform</div>
+      <div class="prop-row"><span class="prop-key">X</span><span class="prop-val" contenteditable>${obj.pos.x.toFixed(2)}</span></div>
+      <div class="prop-row"><span class="prop-key">Y</span><span class="prop-val" contenteditable>${obj.pos.y.toFixed(2)}</span></div>
+      <div class="prop-row"><span class="prop-key">Z</span><span class="prop-val" contenteditable>${obj.pos.z.toFixed(2)}</span></div>
+      <div class="prop-row"><span class="prop-key">Rot Y</span><span class="prop-val" contenteditable>${obj.rot.y.toFixed(1)}°</span></div>
+      <div class="prop-row"><span class="prop-key">Scale</span><span class="prop-val" contenteditable>${obj.scl.x.toFixed(2)}</span></div>
+    </div>
+    <div class="prop-section">
+      <div class="prop-sh">Material</div>
+      <canvas id="matPreviewCanvas" width="200" height="70" style="width:100%;height:70px;border-radius:7px;border:1px solid var(--border);margin-bottom:8px;cursor:pointer" onclick="openShop()"></canvas>
+      <div class="prop-row"><span class="prop-key">Color</span><input type="color" id="matColor" value="${mat.color||'#4d7fff'}" oninput="updateMat()"></div>
+      <div class="prop-row"><span class="prop-key">Metallic</span><span class="prop-val" id="metVal">${(mat.metallic||.2).toFixed(2)}</span></div>
+      <input type="range" class="prop-slider" id="metSlider" min="0" max="1" step=".01" value="${mat.metallic||.2}" oninput="updateMat()">
+      <div class="prop-row"><span class="prop-key">Roughness</span><span class="prop-val" id="rghVal">${(mat.roughness||.6).toFixed(2)}</span></div>
+      <input type="range" class="prop-slider" id="rghSlider" min="0" max="1" step=".01" value="${mat.roughness||.6}" oninput="updateMat()">
+      <div class="prop-row"><span class="prop-key">Emissive</span><input type="color" id="emiColor" value="${mat.emissive||'#000000'}" oninput="updateMat()"></div>
+      <div class="prop-row"><span class="prop-key">Opacity</span><span class="prop-val" id="opVal">${(mat.opacity||1).toFixed(2)}</span></div>
+      <input type="range" class="prop-slider" id="opSlider" min="0" max="1" step=".01" value="${mat.opacity||1}" oninput="updateMat()">
+      <div class="mat-swatches" id="matSwatches"></div>
+      <button class="mat-apply" onclick="applyMat()">APPLY MATERIAL</button>
+    </div>
+    <div class="prop-section">
+      <div class="prop-sh">${obj.type} Settings</div>
+      ${getTypeProps(obj)}
+    </div>`;
+  buildMatSwatches();
+  drawMatPreview();
+}
+
+function getTypeProps(obj){
+  const row=(k,v)=>`<div class="prop-row"><span class="prop-key">${k}</span><span class="prop-val">${v}</span></div>`;
+  if(obj.type==='Light') return row('Type','Directional')+row('Intensity','1.00')+row('Color','#FFFFFF')+row('Shadows','ON');
+  if(obj.type==='Camera') return row('FOV','65°')+row('Near Clip','0.1')+row('Far Clip','1000')+row('AA','MSAA 4x');
+  if(obj.type==='Mesh') return row('Vertices','1,248')+row('Triangles','2,080')+row('UV Channels','2')+row('Cast Shadow','ON');
+  if(obj.type==='Character') return row('Rig','Humanoid')+row('Animations','80')+row('Physics','Ragdoll ON')+row('Speed','5.0 m/s');
+  if(obj.type==='VFX') return row('Particles','2,000')+row('Duration','Looping')+row('Emit Rate','50/s')+row('Culling','ON');
+  return row('Active','true')+row('Layer','Default');
+}
+
+const BUILTIN_MATS=[
+  {name:'Cyan Metal',color:'#00d4ff',metallic:.9,roughness:.1},
+  {name:'Purple Gem',color:'#b44dff',metallic:.0,roughness:.05},
+  {name:'Gold',color:'#ffd700',metallic:.95,roughness:.15},
+  {name:'Matte White',color:'#eeeeee',metallic:.0,roughness:.9},
+  {name:'Dark Slate',color:'#1a2a3a',metallic:.2,roughness:.7},
+  {name:'Neon Pink',color:'#ff4daf',metallic:.3,roughness:.2},
+  {name:'Emerald',color:'#28c840',metallic:.05,roughness:.3},
+  {name:'Rust Red',color:'#8b2500',metallic:.4,roughness:.85},
+];
+
+function buildMatSwatches(){
+  const container=document.getElementById('matSwatches');if(!container)return;
+  container.innerHTML='';
+  BUILTIN_MATS.forEach(m=>{
+    const sw=document.createElement('div');sw.className='mat-swatch';
+    sw.style.background=m.color;sw.title=m.name;
+    sw.onclick=()=>{
+      document.getElementById('matColor').value=m.color;
+      document.getElementById('metSlider').value=m.metallic;
+      document.getElementById('rghSlider').value=m.roughness;
+      updateMat();
+      container.querySelectorAll('.mat-swatch').forEach(s=>s.classList.remove('msel'));
+      sw.classList.add('msel');
+    };
+    container.appendChild(sw);
+  });
+}
+
+function updateMat(){
+  const color=document.getElementById('matColor')?.value||'#4d7fff';
+  const met=parseFloat(document.getElementById('metSlider')?.value||.2);
+  const rgh=parseFloat(document.getElementById('rghSlider')?.value||.6);
+  const emi=document.getElementById('emiColor')?.value||'#000000';
+  const op=parseFloat(document.getElementById('opSlider')?.value||1);
+  if(document.getElementById('metVal'))document.getElementById('metVal').textContent=met.toFixed(2);
+  if(document.getElementById('rghVal'))document.getElementById('rghVal').textContent=rgh.toFixed(2);
+  if(document.getElementById('opVal'))document.getElementById('opVal').textContent=op.toFixed(2);
+  currentMat={color,metallic:met,roughness:rgh,emissive:emi,opacity:op,name:'Custom'};
+  drawMatPreview();
+}
+
+function drawMatPreview(){
+  const canvas=document.getElementById('matPreviewCanvas');if(!canvas)return;
+  const ctx=canvas.getContext('2d');const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  // draw sphere-like gradient
+  const color=currentMat.color||'#4d7fff';
+  const cx=W/2,cy=H/2,r=Math.min(W,H)/2-4;
+  const shine=1-currentMat.roughness;
+  const isMetal=currentMat.metallic>.5;
+  // base
+  const grd=ctx.createRadialGradient(cx-r*.3,cy-r*.3,0,cx,cy,r);
+  grd.addColorStop(0,lightenColor(color,shine*.8));
+  grd.addColorStop(.5,color);
+  grd.addColorStop(1,'#000000');
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle=grd;ctx.fill();
+  // specular
+  if(shine>.1){
+    const sg=ctx.createRadialGradient(cx-r*.35,cy-r*.35,0,cx-r*.35,cy-r*.35,r*.5);
+    sg.addColorStop(0,`rgba(255,255,255,${shine*.9})`);
+    sg.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle=sg;ctx.fill();
+  }
+  // emissive glow
+  if(currentMat.emissive&&currentMat.emissive!='#000000'){
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle=currentMat.emissive+'33';ctx.fill();
+  }
+  // label
+  ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='10px Orbitron, sans-serif';ctx.textAlign='right';ctx.fillText(currentMat.name||'Custom',W-8,H-8);
+}
+
+function lightenColor(hex,amt){
+  let r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  r=Math.min(255,r+Math.round(amt*200));g=Math.min(255,g+Math.round(amt*200));b=Math.min(255,b+Math.round(amt*200));
+  return '#'+r.toString(16).padStart(2,'0')+g.toString(16).padStart(2,'0')+b.toString(16).padStart(2,'0');
+}
+
+function applyMat(){
+  if(!selectedObj){showToast('Select an object first!','wrn');return;}
+  appliedMaterials[selectedObj.id]={...currentMat};
+  showToast(`✓ Material applied to ${selectedObj.name}`,'ok');
+  drawViewport();
+}
+
+// ═══════════════ VIEWPORT ═══════════════
+function initViewport(){
+  const canvas=document.getElementById('vpc');
+  function sizeVP(){canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;}
+  sizeVP();window.addEventListener('resize',()=>{sizeVP();drawViewport();});
+  drawViewport();
+  setInterval(drawViewport,50);
+}
+
+function drawViewport(){
+  const canvas=document.getElementById('vpc');if(!canvas)return;
+  const ctx=canvas.getContext('2d');const W=canvas.width,H=canvas.height;
+  if(!W||!H)return;
+  ctx.clearRect(0,0,W,H);
+  // background gradient
+  const bg=ctx.createRadialGradient(W*.4,H*.35,0,W*.5,H*.5,Math.max(W,H)*.7);
+  bg.addColorStop(0,'#0a1628');bg.addColorStop(1,'#040810');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  // grid floor
+  vpAngle+=.003;
+  ctx.strokeStyle='rgba(0,212,255,0.06)';ctx.lineWidth=1;
+  const gsize=40*vpZoomLevel;const ox=W/2,oy=H*.72;
+  for(let x=-10;x<=10;x++){
+    const sx=ox+x*gsize;
+    ctx.beginPath();ctx.moveTo(sx,oy-5);ctx.lineTo(sx+gsize*4,oy+80);ctx.stroke();
+  }
+  for(let z=0;z<=8;z++){
+    const sy=oy+z*10;
+    ctx.beginPath();ctx.moveTo(ox-10*gsize,sy);ctx.lineTo(ox+10*gsize+gsize*4,sy);ctx.stroke();
+  }
+  // draw objects
+  SCENE_OBJECTS.filter(o=>o.visible&&o.type!=='Root'&&o.type!=='Audio').forEach(obj=>{
+    drawSceneObject(ctx,obj,W,H);
+  });
+  // sky/horizon glow
+  const sky=ctx.createLinearGradient(0,0,0,H*.5);
+  sky.addColorStop(0,'rgba(0,0,0,0)');sky.addColorStop(.7,'rgba(0,0,0,0)');sky.addColorStop(1,'rgba(0,40,80,.12)');
+  ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+}
+
+function drawSceneObject(ctx,obj,W,H){
+  const cx=W*.5+obj.pos.x*18*vpZoomLevel;
+  const cy=H*.65-obj.pos.y*18*vpZoomLevel-obj.pos.z*4;
+  const mat=appliedMaterials[obj.id];
+  const col=mat?mat.color:(obj.color||'#00d4ff');
+  const isSel=selectedObj&&selectedObj.id===obj.id;
+  if(obj.type==='Light'){
+    // sun/light representation
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,30);
+    g.addColorStop(0,col+'cc');g.addColorStop(1,col+'00');
+    ctx.beginPath();ctx.arc(cx,cy,30,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+    ctx.beginPath();ctx.arc(cx,cy,8,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
+    return;
+  }
+  if(obj.type==='Camera'){
+    ctx.save();ctx.translate(cx,cy);ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.globalAlpha=.7;
+    ctx.strokeRect(-10,-7,20,14);ctx.beginPath();ctx.moveTo(10,-5);ctx.lineTo(18,-9);ctx.lineTo(18,9);ctx.lineTo(10,5);ctx.closePath();ctx.stroke();
+    ctx.restore();if(isSel)drawSel(ctx,cx,cy,25);return;
+  }
+  if(obj.type==='Terrain'){
+    // terrain strip
+    ctx.save();ctx.globalAlpha=.6;
+    const pts=[];for(let x=0;x<W;x+=20){pts.push({x:cx-W*.4+x*1.4,y:H*.7+Math.sin(x*.08+vpAngle*2)*8+Math.cos(x*.04)*12});}
+    ctx.beginPath();ctx.moveTo(0,H);
+    pts.forEach(p=>ctx.lineTo(p.x,p.y));
+    ctx.lineTo(W,H);ctx.closePath();
+    const tg=ctx.createLinearGradient(0,H*.6,0,H);
+    tg.addColorStop(0,col+'44');tg.addColorStop(1,col+'11');
+    ctx.fillStyle=tg;ctx.fill();
+    ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.beginPath();pts.forEach((p,i)=>{if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y);});ctx.stroke();
+    ctx.restore();return;
+  }
+  if(obj.type==='VFX'){
+    // particles
+    ctx.save();ctx.globalAlpha=.6;
+    for(let i=0;i<12;i++){
+      const a=vpAngle*2+i*(.523);const r=15+i*3;
+      const px=cx+Math.cos(a)*r,py=cy+Math.sin(a)*r*.5-i*3;
+      const pg=ctx.createRadialGradient(px,py,0,px,py,4);
+      pg.addColorStop(0,col+'ff');pg.addColorStop(1,col+'00');
+      ctx.beginPath();ctx.arc(px,py,4,0,Math.PI*2);ctx.fillStyle=pg;ctx.fill();
+    }
+    ctx.restore();return;
+  }
+  // default box
+  const size=24*obj.scl.x*vpZoomLevel;
+  const rot=obj.rot.y*(Math.PI/180)+vpAngle*.5;
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(rot);
+  if(mat||currentShading==='Material'){
+    const g2=ctx.createLinearGradient(-size,-size,size,size);
+    g2.addColorStop(0,lightenColor(col,.4));g2.addColorStop(1,col);
+    ctx.fillStyle=g2;
+  } else {ctx.fillStyle='transparent';}
+  ctx.fillRect(-size,-size,size*2,size*2);
+  ctx.strokeStyle=isSel?'#fff':col;ctx.lineWidth=isSel?2:1;
+  ctx.strokeRect(-size,-size,size*2,size*2);
+  if(currentShading==='Wireframe'){
+    ctx.strokeStyle=col;ctx.lineWidth=.5;
+    ctx.beginPath();ctx.moveTo(-size,-size);ctx.lineTo(size,size);ctx.moveTo(size,-size);ctx.lineTo(-size,size);ctx.stroke();
+  }
+  // shadow glow
+  ctx.restore();
+  const sg=ctx.createRadialGradient(cx,cy+size,0,cx,cy+size,size*1.5);
+  sg.addColorStop(0,col+'22');sg.addColorStop(1,col+'00');
+  ctx.beginPath();ctx.ellipse(cx,cy+size,size*1.5,size*.4,0,0,Math.PI*2);ctx.fillStyle=sg;ctx.fill();
+  if(isSel)drawSel(ctx,cx,cy,size*1.5);
+  // label
+  ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='9px Share Tech Mono,monospace';ctx.textAlign='center';
+  ctx.fillText(obj.name.slice(0,14),cx,cy+size+18);
+}
+
+function drawSel(ctx,cx,cy,r){
+  ctx.save();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);
+  ctx.beginPath();ctx.arc(cx,cy,r+4,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.restore();
+}
+
+function vpZoom(f){vpZoomLevel=Math.max(.3,Math.min(3,vpZoomLevel*f));}
+function setView(v){document.getElementById('viewMode').textContent=v.toUpperCase();showToast('View: '+v,'inf');}
+function setShading(s,btn){currentShading=s;document.querySelectorAll('[id^=shade]').forEach(b=>b.classList.remove('on'));btn.classList.add('on');document.getElementById('shadingMode').textContent=s.toUpperCase();}
+function setTool(btn,t){document.querySelectorAll('.etbtn[onclick^="setTool"]').forEach(b=>b.classList.remove('on'));btn.classList.add('on');showToast('Tool: '+t,'inf');}
+function addObject(t){const obj={id:'obj'+Date.now(),name:'New '+t,icon:{Mesh:'📦',Light:'💡',Camera:'📷',Terrain:'🏔'}[t]||'📦',color:'#4d7fff',visible:true,pos:{x:Math.random()*4-2,y:0,z:Math.random()*4-2},rot:{x:0,y:0,z:0},scl:{x:1,y:1,z:1},type:t};SCENE_OBJECTS.push(obj);buildHierarchy();showToast('Added '+t,'ok');}
+function playScene(){showToast('▶ Scene is playing… (Simulated)','ok');}
+function animateFPS(){const fps=Math.round(55+Math.random()*10);const tris=(10+Math.random()*5).toFixed(1);document.getElementById('fpsCounter').textContent=`FPS: ${fps} | Tris: ${tris}k | Draw: ${Math.round(20+Math.random()*20)}`;}
+
+// ═══════════════ ASSET BROWSER ═══════════════
+function populateAssetBrowser(){
+  // Scene assets
+  const sc=document.getElementById('ab-scene');sc.innerHTML='';
+  SCENE_OBJECTS.filter(o=>o.type!=='Root').forEach(obj=>{
+    sc.appendChild(makeABCard(obj.icon,obj.name,obj.type,null,null,()=>selectObj(obj)));
+  });
+  // Materials
+  const mc=document.getElementById('ab-mats');mc.innerHTML='';
+  BUILTIN_MATS.forEach(m=>{
+    mc.appendChild(makeABCard(null,m.name,'Material',m.color,null,()=>{
+      if(selectedObj){appliedMaterials[selectedObj.id]={...m};currentMat={...m};showProps(selectedObj);showToast('Material applied','ok');}
+      else showToast('Select an object first','wrn');
+    }));
+  });
+  // owned shop materials
+  SHOP_ITEMS.filter(i=>i.cat==='materials'&&ownedItems.has(i.id)).forEach(i=>{
+    mc.appendChild(makeABCard(i.icon,i.name,'Material',i.matColor,true,()=>{
+      if(selectedObj){appliedMaterials[selectedObj.id]={color:i.matColor||'#4d7fff',metallic:i.metallic||.2,roughness:i.roughness||.6,emissive:'#000000',opacity:1,name:i.name};showProps(selectedObj);showToast('Applied: '+i.name,'ok');}
+      else showToast('Select an object first','wrn');
+    }));
+  });
+  // Maps tab
+  const mp=document.getElementById('ab-maps');mp.innerHTML='';
+  SHOP_ITEMS.filter(i=>i.cat==='maps'&&ownedItems.has(i.id)).forEach(i=>{
+    mp.appendChild(makeABCard(i.icon,i.name,'Map',null,true,()=>showToast('Loading map: '+i.name,'ok')));
+  });
+  if(!mp.children.length)mp.innerHTML='<div style="color:var(--t3);font-size:.75rem;padding:20px">No maps in library. Visit the SETH Store to get maps!</div>';
+  // Owned
+  const ow=document.getElementById('ab-owned');ow.innerHTML='';
+  SHOP_ITEMS.filter(i=>ownedItems.has(i.id)).forEach(i=>{
+    ow.appendChild(makeABCard(i.icon,i.name,i.cat,null,true,()=>showToast('Loaded: '+i.name,'ok')));
+  });
+  if(!ow.children.length)ow.innerHTML='<div style="color:var(--t3);font-size:.75rem;padding:20px">Your library is empty. Get free items from the SETH Store!</div>';
+}
+
+function makeABCard(ico,name,type,col,owned,onclick){
+  const card=document.createElement('div');card.className='abasset';
+  if(onclick)card.onclick=onclick;
+  const thumbBg=col?`background:${col}22;`:`background:linear-gradient(135deg,rgba(0,212,255,.08),rgba(77,127,255,.08));`;
+  card.innerHTML=`<div class="ab-thumb" style="${thumbBg}">${col?`<div style="width:44px;height:44px;border-radius:8px;background:${col};box-shadow:0 0 14px ${col}66"></div>`:`<span style="font-size:1.8rem">${ico||'📦'}</span>`}${owned?'<div class="ab-owned">OWNED</div>':''}</div><div class="ab-info"><div class="ab-name">${name}</div><div class="ab-type">${type}</div></div>`;
+  return card;
+}
+
+function switchABTab(tab,id){
+  document.querySelectorAll('.abtab').forEach(t=>t.classList.remove('abon'));
+  document.querySelectorAll('.abtab-content').forEach(c=>c.classList.remove('abon'));
+  tab.classList.add('abon');document.getElementById(id).classList.add('abon');
+}
+
+// ═══════════════ SHOP ═══════════════
+function openShop(){
+  renderShop();
+  document.getElementById('shop').classList.add('show');
+  updateShopCoins();
+}
+function closeShop(){document.getElementById('shop').classList.remove('show');}
+
+function renderShop(){
+  const grid=document.getElementById('shopGrid');grid.innerHTML='';
+  const q=shopSearch.toLowerCase();
+  const filtered=SHOP_ITEMS.filter(item=>{
+    if(shopCatFilter!=='all'&&item.cat!==shopCatFilter)return false;
+    if(shopTagFilter.size){
+      const pass=[...shopTagFilter].some(tag=>{
+        if(tag==='owned')return ownedItems.has(item.id);
+        if(tag==='free')return item.price===0;
+        if(tag==='4star')return item.rating>=4;
+        return item.tags.includes(tag);
+      });
+      if(!pass)return false;
+    }
+    if(q&&!item.name.toLowerCase().includes(q)&&!item.cat.includes(q))return false;
+    return true;
+  });
+  document.getElementById('cnt-all').textContent=SHOP_ITEMS.length;
+  filtered.forEach(item=>{
+    const owned=ownedItems.has(item.id);
+    const inCart=cart.find(c=>c.id===item.id);
+    const card=document.createElement('div');
+    card.className='shop-item'+(owned?' sowned':'');
+    const badge=owned?'<span class="shop-item-badge badge-owned">OWNED</span>':
+      item.tags.includes('free')?'<span class="shop-item-badge badge-free">FREE</span>':
+      item.tags.includes('sale')?'<span class="shop-item-badge badge-sale">SALE</span>':
+      item.tags.includes('new')?'<span class="shop-item-badge badge-new">NEW</span>':'';
+    const price=item.price===0?`<span class="shop-price spfree">FREE</span>`:owned?`<span class="shop-price spowned">✓ OWNED</span>`:`<span class="shop-price">${item.price} SC</span>`;
+    card.innerHTML=`<div class="shop-item-thumb" style="background:${item.bg}">${badge}<span style="font-size:2.8rem;filter:drop-shadow(0 0 14px rgba(0,0,0,.8))">${item.icon}</span></div><div class="shop-item-info"><div class="shop-item-name">${item.name}</div><div class="shop-item-cat">${item.cat.charAt(0).toUpperCase()+item.cat.slice(1)}</div><div class="shop-item-foot"><span class="shop-stars">${'★'.repeat(item.rating)}${'☆'.repeat(5-item.rating)}</span>${price}</div></div>`;
+    card.onclick=()=>showItemDetail(item);
+    grid.appendChild(card);
+  });
+}
+
+function filterCat(cat,el){
+  shopCatFilter=cat;
+  document.querySelectorAll('.shop-cat').forEach(c=>c.classList.remove('scon'));
+  el.classList.add('scon');renderShop();
+}
+function toggleTag(el,tag){
+  el.classList.toggle('ston');
+  if(shopTagFilter.has(tag))shopTagFilter.delete(tag);else shopTagFilter.add(tag);
+  renderShop();
+}
+function filterShop(){shopSearch=document.getElementById('shopSearch').value;renderShop();}
+
+function showItemDetail(item){
+  selectedItem=item;
+  const owned=ownedItems.has(item.id);
+  const inCart=cart.find(c=>c.id===item.id);
+  document.getElementById('idTop').style.background=item.bg;
+  document.getElementById('idTop').querySelector('.id-close')||document.getElementById('idTop').insertAdjacentHTML('afterbegin','<button class="id-close" onclick="closeDetail()">✕</button>');
+  document.getElementById('idTop').innerHTML=`<button class="id-close" onclick="closeDetail()">✕</button><span style="font-size:5rem;filter:drop-shadow(0 0 20px rgba(0,0,0,.8))">${item.icon}</span>`;
+  const feats=item.features.map(f=>`<div class="id-feat">${f}</div>`).join('');
+  document.getElementById('idBody').innerHTML=`<div class="id-name">${item.name}</div><div class="id-meta"><span class="id-tag">${item.cat}</span><span style="color:var(--w);font-size:.8rem">${'★'.repeat(item.rating)}</span></div><p class="id-desc">${item.desc}</p><div class="id-features">${feats}</div>`;
+  const price=item.price===0?'FREE':item.price+' SC';
+  const btnLabel=owned?'✓ In Your Library':inCart?'✓ In Cart':(item.price===0?'Get Free':'Add to Cart — '+price);
+  const btnStyle=owned?'background:rgba(40,200,64,.15);border:1px solid var(--g);color:var(--g);border-radius:7px;padding:10px 24px;cursor:default;font-family:Orbitron,sans-serif;font-size:.72rem;letter-spacing:2px':
+    `background:linear-gradient(135deg,${item.price===0?'var(--g),#1aaa2e':'var(--w),#e8a800'});border:none;border-radius:7px;padding:10px 24px;cursor:pointer;font-family:Orbitron,sans-serif;font-size:.72rem;letter-spacing:2px;color:#000;font-weight:700;transition:.2s`;
+  document.getElementById('idFoot').innerHTML=`<div class="id-price-big${item.price===0?' free':''}">${price}</div><button style="${btnStyle}" onclick="${owned?'':'addToCart(\"'+item.id+'\")'}">${btnLabel}</button>`;
+  document.getElementById('itemDetail').classList.add('show');
+}
+function closeDetail(){document.getElementById('itemDetail').classList.remove('show');}
+
+function addToCart(id){
+  const item=SHOP_ITEMS.find(i=>i.id===id);if(!item)return;
+  if(ownedItems.has(id)){showToast('Already owned!','wrn');return;}
+  if(cart.find(c=>c.id===id)){showToast('Already in cart','wrn');return;}
+  cart.push(item);renderCart();renderShop();
+  showToast(`Added "${item.name}" to cart`,'ok');
+  closeDetail();
+}
+
+function renderCart(){
+  const container=document.getElementById('cartItems');
+  const count=document.getElementById('cartCount');
+  count.textContent=cart.length+' item'+(cart.length!==1?'s':'');
+  if(!cart.length){container.innerHTML='<div class="sc-empty">🛒<span>Your cart is empty</span><span style="font-size:.65rem;color:var(--t3)">Browse and add items!</span></div>';updateCartTotal();return;}
+  container.innerHTML='';
+  cart.forEach(item=>{
+    const row=document.createElement('div');row.className='sc-item';
+    row.innerHTML=`<div class="sc-item-ico">${item.icon}</div><div class="sc-item-info"><div class="sc-item-name">${item.name}</div><div class="sc-item-price">${item.price===0?'FREE':item.price+' SC'}</div></div><button class="sc-item-del" onclick="removeFromCart('${item.id}')">✕</button>`;
+    container.appendChild(row);
+  });
+  updateCartTotal();
+}
+
+function removeFromCart(id){cart=cart.filter(c=>c.id!==id);renderCart();renderShop();}
+
+function updateCartTotal(){
+  const sub=cart.reduce((a,i)=>a+i.price,0);
+  const freeCount=cart.filter(i=>i.price===0).length;
+  const disc=0;const total=sub-disc;
+  document.getElementById('subtotal').textContent=sub;
+  document.getElementById('discount').textContent=disc;
+  document.getElementById('cartTotal').textContent=total;
+  const btn=document.getElementById('checkoutBtn');
+  btn.disabled=cart.length===0;
+  btn.textContent=cart.length?`💳 ${total===0?'GET FREE — 0 SC':'PURCHASE — '+total+' SC'}`:'Add items to cart';
+}
+
+function checkout(){
+  const total=cart.reduce((a,i)=>a+i.price,0);
+  if(total>coins){showToast('Not enough SethCoins! Need '+total+' SC','err');return;}
+  coins-=total;
+  cart.forEach(item=>ownedItems.add(item.id));
+  const count=cart.length;cart=[];
+  updateShopCoins();renderCart();renderShop();populateAssetBrowser();
+  showToast(`✓ Purchased ${count} item${count!==1?'s':''}! Enjoy your new assets!`,'ok');
+}
+
+function updateShopCoins(){
+  document.getElementById('shopCoins').textContent=coins;
+  document.getElementById('coinDisp').textContent=coins;
+}
+
+// ═══════════════ TOAST ═══════════════
+let toastTimer;
+function showToast(msg,type='inf'){
+  const t=document.getElementById('toast');
+  t.className='toast show t'+type;t.textContent=msg;
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+// ═══════════════ STYLE INJECTION ═══════════════
+const st=document.createElement('style');
+st.textContent=`@keyframes shake{0%,100%{transform:none}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}`;
+document.head.appendChild(st);
+
+// auto-download the engine file itself on demand
+function downloadSelf(){
+  const a=document.createElement('a');a.href=window.location.href;a.download='SETH-ENGINE-v2.5.1.html';a.click();
+  showToast('Downloading SETH ENGINE…','ok');
+}
+</script>
+</body>
+</html>
